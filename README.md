@@ -2,7 +2,7 @@
 
 这个仓库按老师 day07 的代码风格整理：后端保持 `Spring Boot + MyBatis Plus + com.soft` 分层，前端保持 `Vue 3 + Vue CLI + Element Plus`，数据库使用老师提供的 `zzyl.sql`。
 
-组员开发、拉分支、提交代码、提 PR，请先看：[TEAM_README.md](TEAM_README.md)。
+组员开发、拉分支、提交代码、提 PR，请先看：[TEAM_README.md](TEAM_README.md)。交给下一位 AI 时使用：[NEXT_AI_HANDOFF.md](NEXT_AI_HANDOFF.md)；交给三位组员及其 Agent 时使用：[TEAM_AGENT_TASKS.md](TEAM_AGENT_TASKS.md)。前端页面统一遵循：[前端统一布局规范](docs/前端统一布局规范.md)；数据库表结构统一遵循：[数据库核心设计 v1](docs/数据库核心设计-v1.md)。
 
 ## 目录
 

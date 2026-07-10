@@ -8,22 +8,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 public class LoginController {
 
-
-
-    //注入service对象
     @Autowired
     private UserService userService;
-    /*定义用户身份验证接口*/
-    @RequestMapping("/login")
-    public Map<String,Object> userLogin(
-            @RequestBody UserDto userDto
 
-            , HttpSession session){
+    @RequestMapping("/login")
+    public Map<String,Object> userLogin(@RequestBody UserDto userDto, HttpSession session){
         return userService.queryUserService(userDto,session);
+    }
+
+    @RequestMapping("/logout")
+    public Map<String,Object> logout(HttpSession session){
+        session.invalidate();
+        Map<String,Object> result = new HashMap<>();
+        result.put("code",200);
+        result.put("msg","退出成功");
+        return result;
     }
 }

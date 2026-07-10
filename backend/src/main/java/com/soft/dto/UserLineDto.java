@@ -2,13 +2,19 @@ package com.soft.dto;
 
 import lombok.Data;
 
-/*封装用户登录身份验证通过后信息*/
 @Data
 public class UserLineDto {
-
     private Integer id;
     private String realname;
     private String sex;
     private String phone;
     private String image;
+    private String email;
+    private Integer deptId;
+    private String deptName;
+    private Integer postId;
+    private String postName;
+    private Integer roleId;
+    private String roleName;
+    private String account;
 }
