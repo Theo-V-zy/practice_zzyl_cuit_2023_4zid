@@ -175,6 +175,99 @@ export function deleteMessage(id) {
   return request.delete(`/messages/${id}`)
 }
 
+// ========== 来访管理 ==========
+export function getVisitPage(params) {
+  return request.post('/visits/page', params)
+}
+
+export function addVisit(data) {
+  return request.post('/visits', data)
+}
+
+export function updateVisit(data) {
+  return request.put('/visits', data)
+}
+
+export function deleteVisit(id) {
+  return request.delete(`/visits/${id}`)
+}
+
+export function confirmArrive(data) {
+  return request.post('/visits/confirmArrive', data)
+}
+
+// ========== 老人管理 ==========
+export function getElderPage(params) {
+  return request.post('/elders/page', params)
+}
+
+export function addElder(data) {
+  return request.post('/elders', data)
+}
+
+export function updateElder(data) {
+  return request.put('/elders', data)
+}
+
+export function deleteElder(id) {
+  return request.delete(`/elders/${id}`)
+}
+
+// ========== 床位管理 ==========
+export function getBedPage(params) {
+  return request.post('/beds/page', params)
+}
+
+export function addBed(data) {
+  return request.post('/beds', data)
+}
+
+export function updateBed(data) {
+  return request.put('/beds', data)
+}
+
+export function deleteBed(id) {
+  return request.delete(`/beds/${id}`)
+}
+
+// ========== 合同管理 ==========
+export function getContractPage(params) {
+  return request.post('/contracts/page', params)
+}
+
+export function addContract(data) {
+  return request.post('/contracts', data)
+}
+
+export function updateContract(data) {
+  return request.put('/contracts', data)
+}
+
+export function deleteContract(id) {
+  return request.delete(`/contracts/${id}`)
+}
+
+// ========== 入驻/申请管理 ==========
+export function getApplyPage(params) {
+  return request.post('/applies/page', params)
+}
+
+export function addApply(data) {
+  return request.post('/applies', data)
+}
+
+export function updateApply(data) {
+  return request.put('/applies', data)
+}
+
+export function deleteApply(id) {
+  return request.delete(`/applies/${id}`)
+}
+
+export function approveApply(data) {
+  return request.post('/applies/approve', data)
+}
+
 // ========== 工作台 ==========
 export function getDashboardSummary() {
   return request.get('/dashboard/summary')

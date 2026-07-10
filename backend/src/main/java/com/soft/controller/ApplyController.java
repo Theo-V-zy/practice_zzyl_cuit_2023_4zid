@@ -3,9 +3,7 @@ package com.soft.controller;
 import com.soft.pojo.Apply;
 import com.soft.service.ApplyService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,8 +19,8 @@ public class ApplyController {
 
     private static final DateTimeFormatter NO_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
-    @RequestMapping("/applyPage")
-    public Map<String, Object> applyPage(@RequestBody Map<String, Object> params) {
+    @RequestMapping("/applies/page")
+    public Map<String, Object> page(@RequestBody Map<String, Object> params) {
         Integer pageNum = (Integer) params.getOrDefault("pageNum", 1);
         Integer pageSize = (Integer) params.getOrDefault("pageSize", 10);
         String applyType = (String) params.getOrDefault("applyType", null);
@@ -30,49 +28,57 @@ public class ApplyController {
         return applyService.queryApplyPage(pageNum, pageSize, applyType, status);
     }
 
-    @RequestMapping("/saveApply")
-    public Map<String, Object> saveApply(@RequestBody Apply apply) {
+    @PostMapping("/applies")
+    public Map<String, Object> add(@RequestBody Apply apply) {
         Map<String, Object> result = new HashMap<>();
         result.put("code", 400);
-        result.put("msg", "添加失败");
+        if (apply.getElderId() == null) {
+            result.put("msg", "请选择老人");
+            return result;
+        }
+        if (apply.getApplyType() == null || apply.getApplyType().trim().isEmpty()) {
+            result.put("msg", "申请类型不能为空");
+            return result;
+        }
 
         apply.setApplyNo("APL" + LocalDateTime.now().format(NO_FMT) + UUID.randomUUID().toString().substring(0, 4).toUpperCase());
         if (apply.getStatus() == null || apply.getStatus().isEmpty()) {
             apply.setStatus("PENDING");
         }
         apply.setCreateTime(LocalDateTime.now());
-        applyService.save(apply);
 
-        result.put("code", 200);
-        result.put("msg", "添加成功");
+        boolean ok = applyService.save(apply);
+        result.put("code", ok ? 200 : 400);
+        result.put("msg", ok ? "新增成功" : "新增失败");
         return result;
     }
 
-    @RequestMapping("/updateApply")
-    public Map<String, Object> updateApply(@RequestBody Apply apply) {
+    @RequestMapping(value = "/applies", method = RequestMethod.PUT)
+    public Map<String, Object> update(@RequestBody Apply apply) {
         Map<String, Object> result = new HashMap<>();
         result.put("code", 400);
-        result.put("msg", "更新失败");
+        if (apply.getId() == null) {
+            result.put("msg", "ID不能为空");
+            return result;
+        }
         apply.setUpdateTime(LocalDateTime.now());
-        applyService.updateById(apply);
-        result.put("code", 200);
-        result.put("msg", "更新成功");
+        boolean ok = applyService.updateById(apply);
+        result.put("code", ok ? 200 : 400);
+        result.put("msg", ok ? "修改成功" : "修改失败");
         return result;
     }
 
-    @RequestMapping("/deleteApply")
-    public Map<String, Object> deleteApply(Integer id) {
+    @RequestMapping(value = "/applies/{id}", method = RequestMethod.DELETE)
+    public Map<String, Object> delete(@PathVariable Integer id) {
         Map<String, Object> result = new HashMap<>();
-        result.put("code", 400);
-        result.put("msg", "删除失败");
-        applyService.removeById(id);
-        result.put("code", 200);
-        result.put("msg", "删除成功");
+        boolean ok = applyService.removeById(id);
+        result.put("code", ok ? 200 : 400);
+        result.put("msg", ok ? "删除成功" : "删除失败");
         return result;
     }
 
-    @RequestMapping("/approveApply")
-    public Map<String, Object> approveApply(@RequestBody Apply apply) {
+    @RequestMapping("/applies/approve")
+    public Map<String, Object> approve(@RequestBody Apply apply) {
         Map<String, Object> result = new HashMap<>();
         result.put("code", 400);
         result.put("msg", "审批失败");

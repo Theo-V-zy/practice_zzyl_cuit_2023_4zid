@@ -4,9 +4,7 @@ import com.soft.dto.VisitDto;
 import com.soft.pojo.Visit;
 import com.soft.service.VisitService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,16 +24,23 @@ public class VisitController {
         return "VST" + LocalDateTime.now().format(NO_FMT) + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
     }
 
-    @RequestMapping("/visitPage")
-    public Map<String, Object> visitPage(@RequestBody VisitDto dto) {
+    @RequestMapping("/visits/page")
+    public Map<String, Object> page(@RequestBody VisitDto dto) {
         return visitService.queryVisitList(dto);
     }
 
-    @RequestMapping("/saveVisit")
-    public Map<String, Object> saveVisit(@RequestBody Visit visit) {
+    @PostMapping("/visits")
+    public Map<String, Object> add(@RequestBody Visit visit) {
         Map<String, Object> result = new HashMap<>();
         result.put("code", 400);
-        result.put("msg", "添加失败");
+        if (visit.getVisitorName() == null || visit.getVisitorName().trim().isEmpty()) {
+            result.put("msg", "访客姓名不能为空");
+            return result;
+        }
+        if (visit.getElderId() == null) {
+            result.put("msg", "请选择老人");
+            return result;
+        }
 
         visit.setVisitNo(genVisitNo());
         if (visit.getVisitStage() == null || visit.getVisitStage().isEmpty()) {
@@ -45,41 +50,39 @@ public class VisitController {
             visit.setStatus("PENDING");
         }
         visit.setCreateTime(LocalDateTime.now());
-        visitService.save(visit);
 
-        result.put("code", 200);
-        result.put("msg", "添加成功");
+        boolean ok = visitService.save(visit);
+        result.put("code", ok ? 200 : 400);
+        result.put("msg", ok ? "新增成功" : "新增失败");
         return result;
     }
 
-    @RequestMapping("/updateVisit")
-    public Map<String, Object> updateVisit(@RequestBody Visit visit) {
+    @RequestMapping(value = "/visits", method = RequestMethod.PUT)
+    public Map<String, Object> update(@RequestBody Visit visit) {
         Map<String, Object> result = new HashMap<>();
         result.put("code", 400);
-        result.put("msg", "更新失败");
+        if (visit.getId() == null) {
+            result.put("msg", "ID不能为空");
+            return result;
+        }
 
         visit.setUpdateTime(LocalDateTime.now());
-        visitService.updateById(visit);
-
-        result.put("code", 200);
-        result.put("msg", "更新成功");
+        boolean ok = visitService.updateById(visit);
+        result.put("code", ok ? 200 : 400);
+        result.put("msg", ok ? "修改成功" : "修改失败");
         return result;
     }
 
-    @RequestMapping("/deleteVisit")
-    public Map<String, Object> deleteVisit(Integer id) {
+    @RequestMapping(value = "/visits/{id}", method = RequestMethod.DELETE)
+    public Map<String, Object> delete(@PathVariable Integer id) {
         Map<String, Object> result = new HashMap<>();
-        result.put("code", 400);
-        result.put("msg", "删除失败");
-
-        visitService.removeById(id);
-
-        result.put("code", 200);
-        result.put("msg", "删除成功");
+        boolean ok = visitService.removeById(id);
+        result.put("code", ok ? 200 : 400);
+        result.put("msg", ok ? "删除成功" : "删除失败");
         return result;
     }
 
-    @RequestMapping("/confirmArrive")
+    @RequestMapping("/visits/confirmArrive")
     public Map<String, Object> confirmArrive(@RequestBody Visit visit) {
         Map<String, Object> result = new HashMap<>();
         result.put("code", 400);

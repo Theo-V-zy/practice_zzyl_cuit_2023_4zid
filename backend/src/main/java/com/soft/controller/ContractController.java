@@ -3,9 +3,7 @@ package com.soft.controller;
 import com.soft.pojo.Contract;
 import com.soft.service.ContractService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -21,51 +19,55 @@ public class ContractController {
 
     private static final DateTimeFormatter NO_FMT = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
-    @RequestMapping("/contractPage")
-    public Map<String, Object> contractPage(@RequestBody Map<String, Object> params) {
+    @RequestMapping("/contracts/page")
+    public Map<String, Object> page(@RequestBody Map<String, Object> params) {
         Integer pageNum = (Integer) params.getOrDefault("pageNum", 1);
         Integer pageSize = (Integer) params.getOrDefault("pageSize", 10);
         String status = (String) params.getOrDefault("status", null);
         return contractService.queryContractPage(pageNum, pageSize, status);
     }
 
-    @RequestMapping("/saveContract")
-    public Map<String, Object> saveContract(@RequestBody Contract contract) {
+    @PostMapping("/contracts")
+    public Map<String, Object> add(@RequestBody Contract contract) {
         Map<String, Object> result = new HashMap<>();
         result.put("code", 400);
-        result.put("msg", "添加失败");
+        if (contract.getElderId() == null) {
+            result.put("msg", "请选择老人");
+            return result;
+        }
 
         contract.setContractNo("CTR" + LocalDateTime.now().format(NO_FMT) + UUID.randomUUID().toString().substring(0, 4).toUpperCase());
         if (contract.getStatus() == null || contract.getStatus().isEmpty()) {
             contract.setStatus("ACTIVE");
         }
         contract.setCreateTime(LocalDateTime.now());
-        contractService.save(contract);
 
-        result.put("code", 200);
-        result.put("msg", "添加成功");
+        boolean ok = contractService.save(contract);
+        result.put("code", ok ? 200 : 400);
+        result.put("msg", ok ? "新增成功" : "新增失败");
         return result;
     }
 
-    @RequestMapping("/updateContract")
-    public Map<String, Object> updateContract(@RequestBody Contract contract) {
+    @RequestMapping(value = "/contracts", method = RequestMethod.PUT)
+    public Map<String, Object> update(@RequestBody Contract contract) {
         Map<String, Object> result = new HashMap<>();
         result.put("code", 400);
-        result.put("msg", "更新失败");
-        contractService.updateById(contract);
-        result.put("code", 200);
-        result.put("msg", "更新成功");
+        if (contract.getId() == null) {
+            result.put("msg", "ID不能为空");
+            return result;
+        }
+        boolean ok = contractService.updateById(contract);
+        result.put("code", ok ? 200 : 400);
+        result.put("msg", ok ? "修改成功" : "修改失败");
         return result;
     }
 
-    @RequestMapping("/deleteContract")
-    public Map<String, Object> deleteContract(Integer id) {
+    @RequestMapping(value = "/contracts/{id}", method = RequestMethod.DELETE)
+    public Map<String, Object> delete(@PathVariable Integer id) {
         Map<String, Object> result = new HashMap<>();
-        result.put("code", 400);
-        result.put("msg", "删除失败");
-        contractService.removeById(id);
-        result.put("code", 200);
-        result.put("msg", "删除成功");
+        boolean ok = contractService.removeById(id);
+        result.put("code", ok ? 200 : 400);
+        result.put("msg", ok ? "删除成功" : "删除失败");
         return result;
     }
 }

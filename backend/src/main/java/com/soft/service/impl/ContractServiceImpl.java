@@ -6,19 +6,14 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.soft.mapper.ContractMapper;
 import com.soft.pojo.Contract;
 import com.soft.service.ContractService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
 public class ContractServiceImpl extends ServiceImpl<ContractMapper, Contract> implements ContractService {
-
-    @Autowired
-    private ContractMapper contractMapper;
 
     @Override
     public Map<String, Object> queryContractPage(Integer pageNum, Integer pageSize, String status) {
@@ -27,11 +22,12 @@ public class ContractServiceImpl extends ServiceImpl<ContractMapper, Contract> i
         params.eq(StringUtils.hasText(status), "status", status);
         params.orderByDesc("create_time");
 
-        List<Contract> contracts = contractMapper.selectList(page, params);
+        page = this.page(page, params);
 
         Map<String, Object> result = new HashMap<>();
+        result.put("code", 200);
+        result.put("data", page.getRecords());
         result.put("total", page.getTotal());
-        result.put("contracts", contracts);
         return result;
     }
 }
