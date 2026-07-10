@@ -48,6 +48,12 @@ public class MessageController {
         if (dto.getReadStatus() != null) {
             wrapper.eq("read_status", dto.getReadStatus());
         }
+        if (StringUtils.hasText(dto.getStartTime())) {
+            wrapper.ge("create_time", dto.getStartTime());
+        }
+        if (StringUtils.hasText(dto.getEndTime())) {
+            wrapper.le("create_time", dto.getEndTime() + " 23:59:59");
+        }
         wrapper.orderByDesc("create_time");
         Page<Message> page = messageService.page(new Page<>(dto.getPage(), dto.getPageSize()), wrapper);
         result.put("code", 200);

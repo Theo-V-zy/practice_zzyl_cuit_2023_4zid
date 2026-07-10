@@ -13,57 +13,6 @@ const routes = [
     meta: { title: '登录' }
   },
   {
-    path: '/family/login',
-    name: 'FamilyLogin',
-    component: () => import('@/views/family/FamilyLogin.vue'),
-    meta: { title: '家属登录' }
-  },
-  {
-    path: '/family',
-    name: 'FamilyIndex',
-    component: () => import('@/layouts/FamilyLayout.vue'),
-    redirect: '/family/mine',
-    meta: { title: '家属端', requiresFamilyAuth: true },
-    children: [
-      {
-        path: 'mine',
-        name: 'FamilyMine',
-        component: () => import('@/views/family/FamilyMine.vue'),
-        meta: { title: '我的' }
-      },
-      {
-        path: 'contracts',
-        name: 'FamilyContracts',
-        component: () => import('@/views/family/FamilyContracts.vue'),
-        meta: { title: '我的合同' }
-      },
-      {
-        path: 'appointments',
-        name: 'FamilyAppointments',
-        component: () => import('@/views/family/FamilyAppointments.vue'),
-        meta: { title: '我的预约' }
-      },
-      {
-        path: 'orders',
-        name: 'FamilyOrders',
-        component: () => import('@/views/family/FamilyOrders.vue'),
-        meta: { title: '我的订单' }
-      },
-      {
-        path: 'orders/:id',
-        name: 'FamilyOrderDetail',
-        component: () => import('@/views/family/FamilyOrderDetail.vue'),
-        meta: { title: '订单详情' }
-      },
-      {
-        path: 'bills',
-        name: 'FamilyBills',
-        component: () => import('@/views/family/FamilyBills.vue'),
-        meta: { title: '我的账单' }
-      }
-    ]
-  },
-  {
     path: '/MainIndex',
     name: 'MainIndex',
     component: MainIndex,
@@ -150,27 +99,6 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  // 家属端认证
-  if (to.matched.some(record => record.meta.requiresFamilyAuth)) {
-    const familyToken = localStorage.getItem('familyToken')
-    if (!familyToken) {
-      next('/family/login')
-      return
-    }
-    try {
-      const res = await request.get('/family/profile')
-      if (res && res.id) {
-        next()
-        return
-      }
-    } catch (e) {
-      localStorage.removeItem('familyToken')
-      localStorage.removeItem('familyUser')
-      next('/family/login')
-      return
-    }
-  }
-
   // 已登录的管理员不能访问登录页
   if (to.path === '/') {
     try {
@@ -181,22 +109,6 @@ router.beforeEach(async (to, from, next) => {
       }
     } catch (e) {
       // 未登录，正常访问登录页
-    }
-  }
-
-  // 已登录的家属不能访问家属登录页
-  if (to.path === '/family/login') {
-    const familyToken = localStorage.getItem('familyToken')
-    if (familyToken) {
-      try {
-        const res = await request.get('/family/profile')
-        if (res && res.id) {
-          next('/family/mine')
-          return
-        }
-      } catch (e) {
-        localStorage.removeItem('familyToken')
-      }
     }
   }
 

@@ -1,54 +1,71 @@
 <template>
   <section class="page-section">
+    <!-- 查询区 -->
     <el-form :inline="true" :model="queryForm" class="query-form">
       <el-form-item label="标题">
         <el-input v-model="queryForm.title" placeholder="请输入" clearable style="width: 180px" />
       </el-form-item>
-      <el-form-item label="类型">
-        <el-select v-model="queryForm.messageType" placeholder="选择" clearable style="width: 140px">
+      <el-form-item label="消息类型">
+        <el-select v-model="queryForm.messageType" placeholder="消息类型" clearable style="width: 140px">
           <el-option label="系统通知" value="SYSTEM" />
           <el-option label="业务提醒" value="BUSINESS" />
-          <el-option label="预警消息" value="ALERT" />
+          <el-option label="报警通知" value="ALERT" />
         </el-select>
       </el-form-item>
-      <el-form-item label="状态">
-        <el-select v-model="queryForm.readStatus" placeholder="选择" clearable style="width: 120px">
-          <el-option label="未读" :value="0" />
-          <el-option label="已读" :value="1" />
-        </el-select>
+      <el-form-item label="时间范围">
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          range-separator="-"
+          start-placeholder="开始时间"
+          end-placeholder="结束时间"
+          value-format="YYYY-MM-DD"
+          style="width: 240px"
+        />
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" @click="handleQuery">查询</el-button>
+        <el-button type="primary" @click="handleQuery">搜索</el-button>
         <el-button @click="handleReset">重置</el-button>
       </el-form-item>
     </el-form>
 
+    <!-- 未读/已读 Tab + 操作按钮 -->
     <div class="toolbar">
-      <el-button type="primary" :disabled="selectedIds.length === 0" @click="handleBatchRead">批量已读</el-button>
+      <div class="tab-group">
+        <span class="tab-item" :class="{ active: queryForm.readStatus === 0 }" @click="switchTab(0)">
+          未读 <em>{{ unreadCount }}</em>
+        </span>
+        <span class="tab-item" :class="{ active: queryForm.readStatus === 1 }" @click="switchTab(1)">
+          已读 <em>{{ readCount }}</em>
+        </span>
+      </div>
+      <div class="toolbar-actions">
+        <el-button @click="handleBatchRead" :disabled="selectedIds.length === 0">全部已读</el-button>
+        <el-button type="danger" plain @click="handleDeleteAll">全部删除</el-button>
+      </div>
     </div>
 
+    <!-- 表格 -->
     <el-table :data="tableData" v-loading="loading" style="width: 100%" border @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="50" />
-      <el-table-column label="状态" width="70">
+      <el-table-column prop="title" label="消息标题" min-width="250">
         <template #default="{ row }">
-          <span class="unread-dot" v-if="row.readStatus === 0"></span>
+          <div class="msg-title-cell">
+            <span v-if="row.readStatus === 0" class="unread-dot"></span>
+            <el-link type="primary" :underline="false" @click="handleView(row)">{{ row.title }}</el-link>
+          </div>
         </template>
       </el-table-column>
-      <el-table-column prop="title" label="标题" min-width="200">
+      <el-table-column prop="messageType" label="消息类型" width="100">
         <template #default="{ row }">
-          <el-link type="primary" :underline="false" @click="handleView(row)">{{ row.title }}</el-link>
+          <el-tag size="small" :type="row.messageType === 'ALERT' ? 'danger' : ''">{{ typeMap[row.messageType] || row.messageType }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="messageType" label="类型" width="100">
-        <template #default="{ row }">
-          <el-tag size="small">{{ typeMap[row.messageType] || row.messageType }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="createTime" label="时间" width="170" />
-      <el-table-column label="操作" width="160" fixed="right">
+      <el-table-column prop="createTime" label="接收时间" width="170" />
+      <el-table-column label="操作" width="200" fixed="right">
         <template #default="{ row }">
           <el-button size="small" type="primary" link @click="handleView(row)">查看</el-button>
-          <el-button v-if="row.readStatus === 0" size="small" type="warning" link @click="handleRead(row)">标为已读</el-button>
+          <el-button v-if="row.readStatus === 0" size="small" type="warning" link @click="handleMarkRead(row)">标记为已读</el-button>
           <el-button size="small" type="danger" link @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
@@ -63,13 +80,11 @@
       />
     </div>
 
-    <!-- 消息详情弹窗 -->
+    <!-- 详情弹窗 -->
     <el-dialog title="消息详情" v-model="detailVisible" width="500px">
       <div class="msg-detail">
         <h3>{{ currentMsg.title }}</h3>
-        <div style="color: rgba(0,0,0,0.45); font-size: 13px; margin: 8px 0 16px;">
-          {{ currentMsg.createTime }} · {{ typeMap[currentMsg.messageType] || currentMsg.messageType }}
-        </div>
+        <div class="msg-meta">{{ currentMsg.createTime }} · {{ typeMap[currentMsg.messageType] || currentMsg.messageType }}</div>
         <div class="msg-content">{{ currentMsg.content || '暂无详细内容' }}</div>
       </div>
     </el-dialog>
@@ -86,32 +101,65 @@ const tableData = ref([]), total = ref(0)
 const selectedIds = ref([])
 const detailVisible = ref(false)
 const currentMsg = ref({})
+const dateRange = ref(null)
+const unreadCount = ref(0)
+const readCount = ref(0)
 
-const typeMap = { SYSTEM: '系统通知', BUSINESS: '业务提醒', ALERT: '预警消息' }
+const typeMap = { SYSTEM: '系统通知', BUSINESS: '业务提醒', ALERT: '报警通知' }
+const queryForm = reactive({ page: 1, pageSize: 10, title: '', messageType: '', readStatus: 0 })
 
-const queryForm = reactive({ page: 1, pageSize: 10, title: '', messageType: '', readStatus: null })
+function switchTab(status) {
+  queryForm.readStatus = status
+  queryForm.page = 1
+  loadData()
+}
 
 async function loadData() {
   loading.value = true
   try {
-    const res = await getMessagePage({ ...queryForm })
+    const params = { ...queryForm }
+    if (dateRange.value && dateRange.value.length === 2) {
+      params.startTime = dateRange.value[0]
+      params.endTime = dateRange.value[1]
+    }
+    const res = await getMessagePage(params)
     if (res) { tableData.value = res.data || []; total.value = res.total || 0 }
+    // 获取未读/已读计数
+    if (queryForm.readStatus === 0) {
+      unreadCount.value = res.total || 0
+      // 同时查已读数
+      try {
+        const readRes = await getMessagePage({ page: 1, pageSize: 1, readStatus: 1 })
+        if (readRes) readCount.value = readRes.total || 0
+      } catch (e) { /* ignore */ }
+    } else {
+      readCount.value = res.total || 0
+      try {
+        const unreadRes = await getMessagePage({ page: 1, pageSize: 1, readStatus: 0 })
+        if (unreadRes) unreadCount.value = unreadRes.total || 0
+      } catch (e) { /* ignore */ }
+    }
   } finally { loading.value = false }
 }
+
 function handleQuery() { queryForm.page = 1; loadData() }
-function handleReset() { Object.assign(queryForm, { page: 1, pageSize: 10, title: '', messageType: '', readStatus: null }); loadData() }
+function handleReset() {
+  Object.assign(queryForm, { page: 1, pageSize: 10, title: '', messageType: '', readStatus: 0 })
+  dateRange.value = null
+  loadData()
+}
 function handleSelectionChange(rows) { selectedIds.value = rows.map(r => r.id) }
 
 async function handleView(row) {
   try {
     const res = await getMessageDetail(row.id)
-    if (res && res.data) currentMsg.value = res.data
+    if (res?.data) currentMsg.value = res.data
     detailVisible.value = true
-    loadData() // 刷新列表更新已读状态
+    loadData()
   } catch (e) { /* ignore */ }
 }
 
-async function handleRead(row) {
+async function handleMarkRead(row) {
   await readMessage(row.id)
   ElMessage.success('已标记为已读')
   loadData()
@@ -130,14 +178,33 @@ function handleDelete(row) {
     .catch(() => {})
 }
 
+function handleDeleteAll() {
+  ElMessageBox.confirm('确定删除全部消息吗？此操作不可恢复。', '警告', { type: 'warning', confirmButtonText: '全部删除' })
+    .then(async () => {
+      for (const row of tableData.value) {
+        await deleteMessage(row.id)
+      }
+      ElMessage.success('已删除当前页消息')
+      loadData()
+    })
+    .catch(() => {})
+}
+
 onMounted(() => loadData())
 </script>
 
 <style scoped>
 .query-form { margin-bottom: 6px; }
-.toolbar { margin-bottom: 12px; }
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.tab-group { display: flex; gap: 0; }
+.tab-item { padding: 6px 20px; font-size: 14px; color: rgba(0,0,0,0.6); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+.tab-item.active { color: #0052d9; border-bottom-color: #0052d9; font-weight: 600; }
+.tab-item em { font-style: normal; margin-left: 4px; }
+.toolbar-actions { display: flex; gap: 8px; }
 .pagination-wrap { margin-top: 16px; display: flex; justify-content: flex-end; }
-.unread-dot { display: inline-block; width: 8px; height: 8px; background: #0052d9; border-radius: 50%; }
+.msg-title-cell { display: flex; align-items: center; gap: 8px; }
+.unread-dot { display: inline-block; width: 8px; height: 8px; min-width: 8px; background: #0052d9; border-radius: 50%; }
 .msg-detail h3 { margin: 0 0 8px; font-size: 18px; color: #333; }
+.msg-meta { color: rgba(0,0,0,0.4); font-size: 13px; margin-bottom: 16px; }
 .msg-content { padding: 16px; background: #f5f7fa; border-radius: 6px; line-height: 1.8; font-size: 14px; color: #333; }
 </style>

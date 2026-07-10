@@ -110,6 +110,9 @@ public class UserController {
         if (StringUtils.hasText(dto.getPhone())) {
             wrapper.like("phone", dto.getPhone());
         }
+        if (StringUtils.hasText(dto.getEmail())) {
+            wrapper.like("email", dto.getEmail());
+        }
         if (dto.getDeptId() != null) {
             wrapper.eq("dept_id", dto.getDeptId());
         }

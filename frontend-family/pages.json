@@ -1,0 +1,67 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "家属登录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/mine/mine",
+      "style": {
+        "navigationBarTitleText": "我的"
+      }
+    },
+    {
+      "path": "pages/contracts/contracts",
+      "style": {
+        "navigationBarTitleText": "我的合同"
+      }
+    },
+    {
+      "path": "pages/appointments/appointments",
+      "style": {
+        "navigationBarTitleText": "我的预约"
+      }
+    },
+    {
+      "path": "pages/orders/orders",
+      "style": {
+        "navigationBarTitleText": "我的订单"
+      }
+    },
+    {
+      "path": "pages/order-detail/order-detail",
+      "style": {
+        "navigationBarTitleText": "订单详情"
+      }
+    },
+    {
+      "path": "pages/bills/bills",
+      "style": {
+        "navigationBarTitleText": "我的账单"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "中州养老",
+    "navigationBarBackgroundColor": "#0052d9",
+    "backgroundColor": "#f4f5f7"
+  },
+  "tabBar": {
+    "color": "rgba(0,0,0,0.45)",
+    "selectedColor": "#0052d9",
+    "borderStyle": "black",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "static/tab-mine.png",
+        "selectedIconPath": "static/tab-mine-active.png"
+      }
+    ]
+  }
+}
