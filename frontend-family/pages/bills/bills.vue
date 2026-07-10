@@ -1,15 +1,17 @@
 <template>
-  <view class="list-page">
+  <view class="page">
     <view class="list-title">我的账单</view>
-    <view v-if="list.length === 0" class="empty-hint">暂无账单记录</view>
-    <view v-for="item in list" :key="item.id" class="list-card">
-      <view class="card-row"><text class="label">账单编号</text><text>{{ item.billNo || '-' }}</text></view>
-      <view class="card-row"><text class="label">费用名称</text><text>{{ item.feeName || '-' }}</text></view>
-      <view class="card-row"><text class="label">总金额</text><text class="price">¥{{ item.totalAmount || 0 }}</text></view>
-      <view class="card-row"><text class="label">已付</text><text>¥{{ item.paidAmount || 0 }}</text></view>
-      <view class="card-row">
-        <text class="label">状态</text>
-        <text :class="item.status === 'UNPAID' ? 'text-danger' : 'text-success'">
+    <view v-if="list.length === 0" class="empty">暂无账单记录</view>
+    <view v-for="item in list" :key="item.id" class="bill-card">
+      <view class="card-left">
+        <text class="bill-name">{{ item.feeName || '费用' }}</text>
+        <text class="bill-no">{{ item.billNo || '-' }}</text>
+        <text class="bill-month">{{ item.billMonth || '-' }}</text>
+      </view>
+      <view class="card-right">
+        <text class="bill-amount">¥{{ formatPrice(item.totalAmount) }}</text>
+        <text class="bill-paid">已付 ¥{{ formatPrice(item.paidAmount) }}</text>
+        <text class="bill-status" :class="item.status === 'UNPAID' ? 'text-danger' : 'text-success'">
           {{ item.status === 'UNPAID' ? '未支付' : item.status === 'PAID' ? '已支付' : item.status }}
         </text>
       </view>
@@ -26,19 +28,25 @@ export default {
   methods: {
     async loadData() {
       try { const res = await familyBills({ page: 1, pageSize: 50 }); if (res?.data) this.list = res.data } catch (e) {}
-    }
+    },
+    formatPrice(v) { return v ? Number(v).toFixed(2) : '0.00' }
   }
 }
 </script>
 
 <style scoped>
-.list-page { padding: 24rpx; min-height: 100vh; background: #f4f5f7; }
+.page { padding: 24rpx; background: #f4f5f7; min-height: 100vh; }
 .list-title { font-size: 32rpx; font-weight: 600; color: #333; margin-bottom: 20rpx; }
-.empty-hint { padding: 120rpx 0; text-align: center; color: rgba(0,0,0,0.35); font-size: 28rpx; }
-.list-card { padding: 24rpx; margin-bottom: 16rpx; background: #fff; border-radius: 12rpx; border: 1px solid #e7e9ed; }
-.card-row { display: flex; justify-content: space-between; padding: 8rpx 0; font-size: 28rpx; }
-.label { color: rgba(0,0,0,0.5); }
-.price { color: #0052d9; font-weight: 600; }
+.empty { padding: 120rpx 0; text-align: center; color: rgba(0,0,0,0.35); }
+.bill-card { display: flex; justify-content: space-between; padding: 24rpx; margin-bottom: 16rpx; background: #fff; border-radius: 12rpx; border: 1px solid #e7e9ed; }
+.card-left { display: flex; flex-direction: column; gap: 8rpx; }
+.bill-name { font-size: 30rpx; font-weight: 600; color: #333; }
+.bill-no { font-size: 24rpx; color: rgba(0,0,0,0.4); }
+.bill-month { font-size: 24rpx; color: rgba(0,0,0,0.4); }
+.card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6rpx; }
+.bill-amount { font-size: 32rpx; font-weight: 600; color: #e34d59; }
+.bill-paid { font-size: 24rpx; color: rgba(0,0,0,0.5); }
+.bill-status { font-size: 24rpx; }
 .text-danger { color: #e34d59; }
 .text-success { color: #2ba471; }
 </style>
