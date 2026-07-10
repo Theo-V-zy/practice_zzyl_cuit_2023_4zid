@@ -4,12 +4,10 @@
 
 ## 项目启动
 
-```bash
-cd frontend-family
-npm install
-npm run dev:mp-weixin
-# 微信开发者工具 → 导入 → 选择 dist/dev/mp-weixin
-```
+用 **HBuilder X** 打开 `frontend-family/` 目录：
+1. 下载 [HBuilder X](https://www.dcloud.io/hbuilderx.html)
+2. 文件 → 导入 → 从本地目录导入 → 选择 `frontend-family/`
+3. 运行 → 运行到小程序模拟器 → 微信开发者工具
 
 后端地址在 `api/request.js` 的 `BASE_URL`，默认 `http://localhost:8080`。
 

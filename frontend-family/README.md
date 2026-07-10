@@ -1,28 +1,30 @@
 # 中州养老家属端小程序
 
-uni-app 项目，编译为微信小程序运行。
+uni-app 项目，用 HBuilder X 编译为微信小程序。
 
-## 快速开始
+## 环境准备
 
-### 1. 安装依赖
-```bash
-cd frontend-family
-npm install
+1. 下载安装 [HBuilder X](https://www.dcloud.io/hbuilderx.html)
+2. 下载安装 [微信开发者工具](https://developers.weixin.qq.com/miniprogram/dev/devtools/download.html)
+
+## 打开项目
+
+HBuilder X → 文件 → 导入 → 从本地目录导入 → 选择 `frontend-family/`
+
+## 启动调试
+
+HBuilder X 工具栏：运行 → 运行到小程序模拟器 → 微信开发者工具
+
+首次运行需要：
+- 在微信开发者工具中开启"服务端口"（设置 → 安全 → 服务端口）
+- 使用测试号 AppID 或自己的小程序 AppID
+
+## 配置后端地址
+
+编辑 `api/request.js`，修改 `BASE_URL`：
+```js
+const BASE_URL = 'http://localhost:8080'  // 改为实际后端地址
 ```
-
-### 2. 启动开发
-```bash
-# 编译为微信小程序
-npm run dev:mp-weixin
-```
-
-### 3. 导入微信开发者工具
-- 打开微信开发者工具
-- 导入项目 → 选择 `frontend-family/dist/dev/mp-weixin`
-- AppID 使用测试号或你自己的
-
-### 4. 配置后端地址
-编辑 `api/request.js`，修改 `BASE_URL` 为实际后端地址。
 
 ## 项目结构
 ```
@@ -35,27 +37,12 @@ frontend-family/
 │   ├── orders/         # 我的订单
 │   ├── order-detail/   # 订单详情
 │   └── bills/          # 我的账单
-├── api/request.js      # API 请求封装
-├── static/             # 静态资源（图标等）
-├── pages.json          # 路由和 tabBar 配置
+├── api/request.js      # API 请求封装（uni.request）
+├── static/             # 图标等静态资源
+├── pages.json          # 路由和 tabBar
 ├── manifest.json       # 小程序配置
 └── App.vue             # 应用入口
 ```
-
-## 页面说明
-
-| 页面 | 路径 | 说明 |
-|------|------|------|
-| 登录 | pages/login/login | 家属账号密码登录 |
-| 我的 | pages/mine/mine | 个人信息、绑定家人、功能入口 |
-| 我的合同 | pages/contracts/contracts | 合同卡片列表、状态标签、下载/查看 |
-| 我的预约 | pages/appointments/appointments | Tab筛选（全部/参观/探访）、取消预约 |
-| 我的订单 | pages/orders/orders | Tab筛选（全部/待支付/待执行/已完成）、状态驱动操作按钮 |
-| 订单详情 | pages/order-detail/order-detail | 订单完整信息、支付倒计时、状态流转、养老院介绍 |
-| 我的账单 | pages/bills/bills | 账单列表、金额/已付/状态 |
-
-## 后端接口
-所有接口以 `/family/` 为前缀，详见后端 `FamilyController.java`。
 
 ## 测试账号
 - 账号：family001

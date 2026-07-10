@@ -1,24 +1,11 @@
 {
   "name": "zzyl-family-miniapp",
   "version": "1.0.0",
-  "description": "中州养老家属端微信小程序",
+  "description": "中州养老家属端微信小程序 (uni-app)",
   "scripts": {
     "dev:mp-weixin": "uni -p mp-weixin",
     "build:mp-weixin": "uni build -p mp-weixin"
   },
-  "dependencies": {
-    "@dcloudio/uni-app": "^3.0.0",
-    "@dcloudio/uni-mp-weixin": "^3.0.0",
-    "@dcloudio/uni-ui": "^1.4.0",
-    "vue": "^3.2.0",
-    "pinia": "^2.0.0"
-  },
-  "devDependencies": {
-    "@dcloudio/types": "^3.0.0",
-    "@dcloudio/uni-automator": "^3.0.0",
-    "@dcloudio/uni-cli-shared": "^3.0.0",
-    "@dcloudio/vite-plugin-uni": "^3.0.0",
-    "sass": "^1.50.0",
-    "vite": "^4.0.0"
-  }
+  "dependencies": {},
+  "devDependencies": {}
 }
