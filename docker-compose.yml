@@ -1,0 +1,20 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: zzyl-mysql
+    restart: unless-stopped
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD:-we005218}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-zzyl}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - zzyl_mysql_data:/var/lib/mysql
+      - ./database/zzyl.sql:/docker-entrypoint-initdb.d/zzyl.sql:ro
+
+volumes:
+  zzyl_mysql_data:
