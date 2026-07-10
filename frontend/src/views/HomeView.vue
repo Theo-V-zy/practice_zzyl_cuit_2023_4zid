@@ -1,19 +1,19 @@
 <template>
   <div class="login-container">
     <div class="login-card">
-      <!-- 标题区域 -->
       <div class="login-header">
+        <img class="login-logo" :src="logoMark" alt="中州养老" />
         <h1 class="system-title">智慧养老服务平台</h1>
         <p class="system-subtitle">关爱老人 · 用心服务</p>
       </div>
 
-      <!-- 登录表单 -->
       <el-form
           ref="loginFormRef"
           :model="loginForm"
           :rules="loginRules"
           class="login-form"
           size="large"
+          @keyup.enter="handleLogin"
       >
         <el-form-item prop="account">
           <el-input
@@ -46,11 +46,8 @@
         </el-form-item>
       </el-form>
 
-      <!-- 底部链接 -->
       <div class="login-footer">
-        <el-link type="primary" :underline="false">忘记密码</el-link>
-        <span class="divider">|</span>
-        <el-link type="primary" :underline="false">注册账号</el-link>
+        <span>默认账号：20260023 / 222222</span>
       </div>
     </div>
   </div>
@@ -60,47 +57,46 @@
 import { ref, reactive } from 'vue'
 import { User, Lock } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import axios from "axios";
-import {useRouter} from "vue-router";
+import { useRouter } from 'vue-router'
+import { login, loadInfo } from '@/api/admin'
+import logoMark from '@/assets/zhyl-logo-mark.png'
 
 const loginFormRef = ref(null)
 const loading = ref(false)
+const router = useRouter()
 
-// 表单数据
 const loginForm = reactive({
   account: '',
   upwd: ''
 })
 
-// 表单验证规则
 const loginRules = {
   account: [
     { required: true, message: '请输入账号', trigger: 'blur' }
   ],
   upwd: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
+    { required: true, message: '请输入密码', trigger: 'blur' }
   ]
 }
-//创建router对象
-const route=new useRouter();
 
-//定义函数发生登录请求
-function handleLogin(){
-  //axios.post("http:localhost:8080/login",loginForm)
-  axios.post("/login",loginForm)
-  .then(response=>{
-    if(response.data.code==200){
-      //身份验证通过进行跳转，跳转到后台首页MainIndex
-      route.replace("/MainIndex"); //编程进行路由跳转
-      return;
+async function handleLogin() {
+  const valid = await loginFormRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  loading.value = true
+  try {
+    const res = await login({ account: loginForm.account, upwd: loginForm.upwd })
+    if (res.code === 200) {
+      ElMessage.success('登录成功')
+      router.replace('/MainIndex')
+    } else {
+      ElMessage.error(res.msg || '登录失败')
     }
-    ElMessage(response.data.msg);
-
-  })
-  .catch(error=>{
-    console.log(error);
-  });
+  } catch (e) {
+    ElMessage.error('登录失败，请检查网络')
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 
@@ -110,7 +106,7 @@ function handleLogin(){
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #0052d9 0%, #3370ff 50%, #85b0ff 100%);
   padding: 20px;
 }
 
@@ -118,25 +114,32 @@ function handleLogin(){
   width: 420px;
   padding: 50px 40px;
   background: #ffffff;
-  border-radius: 16px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
+}
+
+.login-logo {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+  object-fit: contain;
 }
 
 .system-title {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
-  color: #2c3e50;
-  margin: 0 0 10px 0;
+  color: #333333;
+  margin: 0 0 8px 0;
 }
 
 .system-subtitle {
-  font-size: 16px;
-  color: #909399;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.45);
   margin: 0;
 }
 
@@ -144,36 +147,19 @@ function handleLogin(){
   margin-top: 10px;
 }
 
-.login-form :deep(.el-input__wrapper) {
-  padding: 4px 12px;
-  font-size: 16px;
-}
-
-.login-form :deep(.el-input__inner) {
-  font-size: 16px;
-}
-
 .login-btn {
   width: 100%;
-  height: 48px;
-  font-size: 18px;
-  font-weight: 500;
+  height: 44px;
+  font-size: 16px;
   letter-spacing: 4px;
-  border-radius: 8px;
-  margin-top: 10px;
+  border-radius: 6px;
+  margin-top: 8px;
 }
 
 .login-footer {
   text-align: center;
-  margin-top: 20px;
-}
-
-.login-footer .el-link {
-  font-size: 15px;
-}
-
-.divider {
-  margin: 0 12px;
-  color: #dcdfe6;
+  margin-top: 24px;
+  color: rgba(0, 0, 0, 0.35);
+  font-size: 13px;
 }
 </style>

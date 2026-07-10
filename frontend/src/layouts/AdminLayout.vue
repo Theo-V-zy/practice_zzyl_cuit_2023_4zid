@@ -95,7 +95,8 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import axios from 'axios'
+import { getMenus, loadInfo, logout } from '@/api/admin'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   ArrowDown,
   Bell,
@@ -170,12 +171,6 @@ function iconFor(name) {
   return iconMap[name] || MenuIcon
 }
 
-function sortTree(items) {
-  return [...items]
-    .sort((a, b) => (a.sort || 0) - (b.sort || 0))
-    .map((item) => ({ ...item, subItems: sortTree(childrenOf(item)) }))
-}
-
 function collectParentIds(items) {
   return items.flatMap((item) => hasChildren(item) ? [String(item.id), ...collectParentIds(childrenOf(item))] : [])
 }
@@ -187,8 +182,8 @@ function containsPath(item, path) {
 function firstPath(item) {
   if (item.path) return item.path
   for (const child of childrenOf(item)) {
-    const path = firstPath(child)
-    if (path) return path
+    const p = firstPath(child)
+    if (p) return p
   }
   return '/Dashboard'
 }
@@ -210,10 +205,16 @@ function useServerMenus(data) {
 }
 
 function loadMenus() {
-  axios.get('/sysMenus')
-    .then(({ data }) => {
+  getMenus()
+    .then((data) => {
       if (useServerMenus(data)) {
-        const visibleTop = sortTree(data.filter((item) => expectedTopNames.includes(item.mname)))
+        const visibleTop = data
+          .filter((item) => expectedTopNames.includes(item.mname))
+          .sort((a, b) => (a.sort || 0) - (b.sort || 0))
+          .map((item) => ({
+            ...item,
+            subItems: (item.subItems || []).sort((a, b) => (a.sort || 0) - (b.sort || 0))
+          }))
         const utilityMenus = prototypeNavigation.filter((item) => item.topVisible === false)
         menuList.value = [...visibleTop, ...utilityMenus]
       }
@@ -223,10 +224,14 @@ function loadMenus() {
 }
 
 function loadUserInfo() {
-  axios.get('/loadInfo')
-    .then(({ data }) => {
-      realName.value = data?.uname || data?.realname || ''
-      userImage.value = data?.image || ''
+  loadInfo()
+    .then((data) => {
+      if (data && data.realname) {
+        realName.value = data.realname
+        userImage.value = data.image || ''
+        // 保存到localStorage用于其他页面
+        localStorage.setItem('adminUser', JSON.stringify(data))
+      }
     })
     .catch(() => {})
 }
@@ -236,9 +241,18 @@ function handleUserCommand(command) {
   if (command === 'password') router.push('/ModifyPwd')
   if (command === 'messages') router.push('/Messages')
   if (command === 'logout') {
-    localStorage.clear()
-    sessionStorage.clear()
-    router.replace('/')
+    ElMessageBox.confirm('确定要退出登录吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      logout().finally(() => {
+        localStorage.clear()
+        sessionStorage.clear()
+        router.replace('/')
+        ElMessage.success('已退出登录')
+      })
+    }).catch(() => {})
   }
 }
 
@@ -463,31 +477,25 @@ onMounted(() => {
   .admin-workspace {
     grid-template-columns: 210px minmax(0, 1fr);
   }
-
   .brand-block {
     padding-right: 10px;
     padding-left: 14px;
   }
-
   .brand-logo {
     width: 44px;
     height: 44px;
     flex-basis: 44px;
   }
-
   .brand-copy strong {
     font-size: 22px;
   }
-
   .top-navigation {
     gap: 4px;
     padding: 0 10px;
   }
-
   .top-module {
     flex-basis: 76px;
   }
-
   .admin-content {
     padding: 18px;
   }

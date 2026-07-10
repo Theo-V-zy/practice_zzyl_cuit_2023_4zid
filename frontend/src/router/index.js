@@ -3,9 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import MainIndex from '../views/MainIndex.vue'
 import UserInfo from '../views/UesrInfo'
 import ModifyPwd from '../views/ModifyPwd'
-/*
-import NursingItem from '../views/NursingItem'
-*/
+import request from '@/api/request'
 
 const routes = [
   {
@@ -15,21 +13,63 @@ const routes = [
     meta: { title: '登录' }
   },
   {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutView.vue')
+    path: '/family/login',
+    name: 'FamilyLogin',
+    component: () => import('@/views/family/FamilyLogin.vue'),
+    meta: { title: '家属登录' }
+  },
+  {
+    path: '/family',
+    name: 'FamilyIndex',
+    component: () => import('@/layouts/FamilyLayout.vue'),
+    redirect: '/family/mine',
+    meta: { title: '家属端', requiresFamilyAuth: true },
+    children: [
+      {
+        path: 'mine',
+        name: 'FamilyMine',
+        component: () => import('@/views/family/FamilyMine.vue'),
+        meta: { title: '我的' }
+      },
+      {
+        path: 'contracts',
+        name: 'FamilyContracts',
+        component: () => import('@/views/family/FamilyContracts.vue'),
+        meta: { title: '我的合同' }
+      },
+      {
+        path: 'appointments',
+        name: 'FamilyAppointments',
+        component: () => import('@/views/family/FamilyAppointments.vue'),
+        meta: { title: '我的预约' }
+      },
+      {
+        path: 'orders',
+        name: 'FamilyOrders',
+        component: () => import('@/views/family/FamilyOrders.vue'),
+        meta: { title: '我的订单' }
+      },
+      {
+        path: 'orders/:id',
+        name: 'FamilyOrderDetail',
+        component: () => import('@/views/family/FamilyOrderDetail.vue'),
+        meta: { title: '订单详情' }
+      },
+      {
+        path: 'bills',
+        name: 'FamilyBills',
+        component: () => import('@/views/family/FamilyBills.vue'),
+        meta: { title: '我的账单' }
+      }
+    ]
   },
   {
     path: '/MainIndex',
     name: 'MainIndex',
     component: MainIndex,
     redirect: '/Dashboard',
-    meta: { title: '工作台' },
-    //配置MainIndex组件的二级组件
-    children:[
+    meta: { title: '工作台', requiresAuth: true },
+    children: [
       {
         path: '/UserInfo',
         name: 'UserInfo',
@@ -44,8 +84,8 @@ const routes = [
       },
       { path: '/NursingItem', name: 'NursingItem', meta: { title: '护理项目' }, component: () => import('@/views/NursingItem.vue') },
       { path: '/NursingPlain', name: 'NursingPlain', meta: { title: '护理计划' }, component: () => import('@/views/NursingPlain.vue') },
-      { path: '/Dashboard', name: 'Dashboard', meta: { title: '工作台' }, component: () => import('@/views/ModulePlaceholder.vue') },
-      { path: '/Messages', name: 'Messages', meta: { title: '消息中心' }, component: () => import('@/views/ModulePlaceholder.vue') },
+      { path: '/Dashboard', name: 'Dashboard', meta: { title: '工作台' }, component: () => import('@/views/admin/Dashboard.vue') },
+      { path: '/Messages', name: 'Messages', meta: { title: '消息中心' }, component: () => import('@/views/admin/Messages.vue') },
       { path: '/Visit', name: 'Visit', meta: { title: '来访管理' }, component: () => import('@/views/ModulePlaceholder.vue') },
       { path: '/VisitRecord', name: 'VisitRecord', meta: { title: '来访登记' }, component: () => import('@/views/ModulePlaceholder.vue') },
       { path: '/Apply', name: 'Apply', meta: { title: '入退管理' }, component: () => import('@/views/ModulePlaceholder.vue') },
@@ -70,12 +110,12 @@ const routes = [
       { path: '/Device', name: 'Device', meta: { title: '智能监测' }, component: () => import('@/views/ModulePlaceholder.vue') },
       { path: '/Alert', name: 'Alert', meta: { title: '报警数据' }, component: () => import('@/views/ModulePlaceholder.vue') },
       { path: '/AlertRule', name: 'AlertRule', meta: { title: '报警规则' }, component: () => import('@/views/ModulePlaceholder.vue') },
-      { path: '/UserManage', name: 'UserManage', meta: { title: '用户管理' }, component: () => import('@/views/ModulePlaceholder.vue') },
-      { path: '/RoleManage', name: 'RoleManage', meta: { title: '角色管理' }, component: () => import('@/views/ModulePlaceholder.vue') },
-      { path: '/RoleDataScope', name: 'RoleDataScope', meta: { title: '角色数据权限' }, component: () => import('@/views/ModulePlaceholder.vue') },
-      { path: '/MenuManage', name: 'MenuManage', meta: { title: '菜单管理' }, component: () => import('@/views/ModulePlaceholder.vue') },
-      { path: '/Department', name: 'Department', meta: { title: '部门管理' }, component: () => import('@/views/ModulePlaceholder.vue') },
-      { path: '/Post', name: 'Post', meta: { title: '职位管理' }, component: () => import('@/views/ModulePlaceholder.vue') }
+      { path: '/UserManage', name: 'UserManage', meta: { title: '用户管理' }, component: () => import('@/views/admin/UserManage.vue') },
+      { path: '/RoleManage', name: 'RoleManage', meta: { title: '角色管理' }, component: () => import('@/views/admin/RoleManage.vue') },
+      { path: '/RoleDataScope', name: 'RoleDataScope', meta: { title: '角色数据权限' }, component: () => import('@/views/admin/RoleDataScope.vue') },
+      { path: '/MenuManage', name: 'MenuManage', meta: { title: '菜单管理' }, component: () => import('@/views/admin/MenuManage.vue') },
+      { path: '/Department', name: 'Department', meta: { title: '部门管理' }, component: () => import('@/views/admin/Department.vue') },
+      { path: '/Post', name: 'Post', meta: { title: '职位管理' }, component: () => import('@/views/admin/Post.vue') }
     ]
   }
 ]
@@ -83,6 +123,84 @@ const routes = [
 const router = createRouter({
   history: createWebHashHistory(),
   routes
+})
+
+// 路由守卫：管理端登录状态检查和恢复
+router.beforeEach(async (to, from, next) => {
+  // 管理端认证
+  if (to.matched.some(record => record.meta.requiresAuth !== false && (record.meta.requiresAuth || record.path.startsWith('/MainIndex')))) {
+    // 先检查是否已有登录态
+    if (to.path === '/MainIndex' || to.matched.some(r => r.path && r.path.startsWith('/MainIndex'))) {
+      try {
+        const res = await request.get('/loadInfo')
+        if (res && res.id) {
+          // 登录态有效
+          next()
+          return
+        }
+      } catch (e) {
+        // 登录态失效，跳回登录页
+        localStorage.clear()
+        sessionStorage.clear()
+        next('/')
+        return
+      }
+    }
+    next()
+    return
+  }
+
+  // 家属端认证
+  if (to.matched.some(record => record.meta.requiresFamilyAuth)) {
+    const familyToken = localStorage.getItem('familyToken')
+    if (!familyToken) {
+      next('/family/login')
+      return
+    }
+    try {
+      const res = await request.get('/family/profile')
+      if (res && res.id) {
+        next()
+        return
+      }
+    } catch (e) {
+      localStorage.removeItem('familyToken')
+      localStorage.removeItem('familyUser')
+      next('/family/login')
+      return
+    }
+  }
+
+  // 已登录的管理员不能访问登录页
+  if (to.path === '/') {
+    try {
+      const res = await request.get('/loadInfo')
+      if (res && res.id) {
+        next('/MainIndex')
+        return
+      }
+    } catch (e) {
+      // 未登录，正常访问登录页
+    }
+  }
+
+  // 已登录的家属不能访问家属登录页
+  if (to.path === '/family/login') {
+    const familyToken = localStorage.getItem('familyToken')
+    if (familyToken) {
+      try {
+        const res = await request.get('/family/profile')
+        if (res && res.id) {
+          next('/family/mine')
+          return
+        }
+      } catch (e) {
+        localStorage.removeItem('familyToken')
+      }
+    }
+  }
+
+  next()
 })
 
 export default router

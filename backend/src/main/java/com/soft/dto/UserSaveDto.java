@@ -3,18 +3,17 @@ package com.soft.dto;
 import lombok.Data;
 
 @Data
-public class UserLineDto {
+public class UserSaveDto {
     private Integer id;
-    private String realname;
-    private String sex;
-    private String phone;
-    private String image;
-    private String email;
-    private Integer deptId;
-    private String deptName;
-    private Integer postId;
-    private String postName;
-    private Integer roleId;
-    private String roleName;
     private String account;
+    private String upwd;
+    private String realname;
+    private String email;
+    private String phone;
+    private String sex;
+    private Integer islock;
+    private String image;
+    private Integer deptId;
+    private Integer postId;
+    private Integer roleId;
 }
