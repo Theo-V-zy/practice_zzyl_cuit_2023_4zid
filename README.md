@@ -2,6 +2,8 @@
 
 这个仓库按老师 day07 的代码风格整理：后端保持 `Spring Boot + MyBatis Plus + com.soft` 分层，前端保持 `Vue 3 + Vue CLI + Element Plus`，数据库使用老师提供的 `zzyl.sql`。
 
+组员开发、拉分支、提交代码、提 PR，请先看：[TEAM_README.md](TEAM_README.md)。
+
 ## 目录
 
 - `backend/`：Spring Boot 后端，默认端口 `8080`
