@@ -1,15 +1,15 @@
 package com.soft.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.soft.dto.UserLineDto;
 import com.soft.pojo.Menu;
 import com.soft.service.MenuService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 public class MenuController {
@@ -18,8 +18,87 @@ public class MenuController {
     private MenuService menuService;
 
     @RequestMapping("/sysMenus")
-    public List<Menu> sysMenusList(){
-        return menuService.querySysMenuList();
+    public List<Menu> sysMenusList(HttpSession session){
+        List<Menu> allMenus = menuService.querySysMenuList();
+
+        // 从Session获取当前用户的菜单权限
+        Object online = session.getAttribute("online");
+        if (online == null) {
+            return allMenus; // 未登录返回全部（登录页用不到）
+        }
+        UserLineDto user = (UserLineDto) online;
+        String menuIds = user.getMenuIds();
+
+        // 如果是全部权限（menuIds 包含所有菜单ID），返回全部
+        if (menuIds == null || menuIds.isEmpty() || menuIds.contains("1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24")) {
+            return allMenus;
+        }
+
+        // 解析允许的菜单ID集合
+        Set<Integer> allowedIds = Arrays.stream(menuIds.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .map(Integer::parseInt)
+            .collect(Collectors.toSet());
+
+        // 过滤菜单树：保留允许的菜单及其父节点链
+        return filterMenus(allMenus, allowedIds);
+    }
+
+    private List<Menu> filterMenus(List<Menu> allMenus, Set<Integer> allowedIds) {
+        // 收集所有需要保留的ID（包括允许菜单的所有祖先）
+        Set<Integer> keepIds = new HashSet<>(allowedIds);
+        for (Menu menu : allMenus) {
+            if (allowedIds.contains(menu.getId())) {
+                // 向上追溯父节点
+                addParentChain(allMenus, menu.getPid(), keepIds);
+            }
+        }
+
+        // 过滤并重建树
+        List<Menu> filtered = new ArrayList<>();
+        for (Menu menu : allMenus) {
+            if (keepIds.contains(menu.getId()) && menu.getPid() == 0) {
+                Menu copy = copyMenu(menu);
+                copy.setSubItems(filterChildren(allMenus, keepIds, menu.getId()));
+                filtered.add(copy);
+            }
+        }
+        return filtered;
+    }
+
+    private void addParentChain(List<Menu> allMenus, Integer pid, Set<Integer> keepIds) {
+        if (pid == null || pid == 0) return;
+        keepIds.add(pid);
+        for (Menu m : allMenus) {
+            if (m.getId().equals(pid)) {
+                addParentChain(allMenus, m.getPid(), keepIds);
+                break;
+            }
+        }
+    }
+
+    private List<Menu> filterChildren(List<Menu> allMenus, Set<Integer> keepIds, Integer parentId) {
+        List<Menu> children = new ArrayList<>();
+        for (Menu menu : allMenus) {
+            if (keepIds.contains(menu.getId()) && parentId.equals(menu.getPid())) {
+                Menu copy = copyMenu(menu);
+                copy.setSubItems(filterChildren(allMenus, keepIds, menu.getId()));
+                children.add(copy);
+            }
+        }
+        return children;
+    }
+
+    private Menu copyMenu(Menu src) {
+        Menu m = new Menu();
+        m.setId(src.getId());
+        m.setPid(src.getPid());
+        m.setMname(src.getMname());
+        m.setPath(src.getPath());
+        m.setSort(src.getSort());
+        m.setVisible(src.getVisible());
+        return m;
     }
 
     @GetMapping("/menus/tree")

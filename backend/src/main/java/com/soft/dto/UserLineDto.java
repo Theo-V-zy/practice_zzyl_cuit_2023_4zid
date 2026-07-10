@@ -17,4 +17,5 @@ public class UserLineDto {
     private Integer roleId;
     private String roleName;
     private String account;
+    private String menuIds;
 }
