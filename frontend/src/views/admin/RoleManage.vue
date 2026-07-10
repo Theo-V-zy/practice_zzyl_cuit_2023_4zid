@@ -132,9 +132,12 @@ function handleDelete(r){
     .then(async()=>{await deleteRole(r.id);ElMessage.success('已删除');if(selectedRole.value?.id===r.id)selectedRole.value=null;loadData()}).catch(()=>{})
 }
 function handleToggle(r){
-  const action=r.status===1?'禁用':'启用'
-  ElMessageBox.confirm(`${action}后将无法展示，是否继续？`,`确认${action}`,{type:'warning'})
-    .then(async()=>{await updateRole({id:r.id,status:r.status===1?0:1});ElMessage.success(`${action}成功`);loadData()}).catch(()=>{})
+  if(r.status===1){
+    ElMessageBox.confirm('禁用后将无法展示，是否继续？','确认禁用',{type:'warning'})
+      .then(async()=>{await updateRole({id:r.id,status:0});ElMessage.success('禁用成功');loadData()}).catch(()=>{})
+  } else {
+    updateRole({id:r.id,status:1}).then(()=>{ElMessage.success('启用成功');loadData()})
+  }
 }
 async function saveMenus(){
   if(!selectedRole.value)return

@@ -196,9 +196,14 @@ function handleDelete(row){
     .then(async()=>{ await updateUserStatus(row.id,-1); ElMessage.success('已删除'); loadData() }).catch(()=>{})
 }
 function handleToggle(row){
-  const action=row.islock===0?'禁用':'启用'
-  ElMessageBox.confirm(`此操作将${action}该用户，是否继续？`,`确认${action}`,{type:'warning'})
-    .then(async()=>{ await updateUserStatus(row.id,row.islock===0?0:1); ElMessage.success(`${action}成功`); loadData() }).catch(()=>{})
+  if(row.islock===0){
+    // 禁用需要确认弹窗
+    ElMessageBox.confirm('此操作将禁用该用户，是否继续？','确认禁用',{type:'warning'})
+      .then(async()=>{ await updateUserStatus(row.id,1); ElMessage.success('禁用成功'); loadData() }).catch(()=>{})
+  } else {
+    // 启用直接操作，不出确认弹窗
+    updateUserStatus(row.id,0).then(()=>{ ElMessage.success('启用成功'); loadData() })
+  }
 }
 function handleResetPwd(row){
   ElMessageBox.confirm('此操作将重置该用户密码，是否继续？初始密码为888itcast.CN764%...', '确认重置密码', {type:'warning'})
