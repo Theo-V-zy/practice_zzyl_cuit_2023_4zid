@@ -2,23 +2,17 @@
   <section class="page-section">
     <h3 class="page-title">修改密码</h3>
     <el-form ref="formRef" :model="form" :rules="rules" label-width="100px" class="pwd-form" size="large">
-      <el-form-item prop="oldpwd">
-        <template #label>
-          <span style="color:red">*</span> 原密码
-        </template>
+      <el-form-item prop="oldpwd" label="原密码" :required="false">
+        <template #label><span class="label-star">*</span> 原密码</template>
         <el-input v-model="form.oldpwd" type="password" placeholder="请输入" show-password />
       </el-form-item>
-      <el-form-item prop="newpwd">
-        <template #label>
-          <span style="color:red">*</span> 新密码
-        </template>
+      <el-form-item prop="newpwd" label="新密码" :required="false">
+        <template #label><span class="label-star">*</span> 新密码</template>
         <el-input v-model="form.newpwd" type="password" placeholder="请输入" show-password />
         <p class="pwd-hint">密码长度8-20位，必须包含数字、小写字母、大写字母</p>
       </el-form-item>
-      <el-form-item prop="newpwd2">
-        <template #label>
-          <span style="color:red">*</span> 确认新密码
-        </template>
+      <el-form-item prop="newpwd2" label="确认新密码" :required="false">
+        <template #label><span class="label-star">*</span> 确认新密码</template>
         <el-input v-model="form.newpwd2" type="password" placeholder="请输入" show-password />
       </el-form-item>
       <el-form-item>
@@ -80,23 +74,12 @@ const validatePassword = (rule, value, callback) => {
 }
 
 const rules = {
-  oldpwd: [{ required: true, message: '请输入原密码', trigger: 'blur' }],
+  oldpwd: [{ validator: (r,v,cb)=>{ if(!v) cb(new Error('请输入原密码')); else cb() }, trigger: 'blur' }],
   newpwd: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { validator: validatePassword, trigger: 'blur' }
+    { validator: (r,v,cb)=>{ if(!v) cb(new Error('请输入新密码')); else validatePassword(r,v,cb) }, trigger: 'blur' }
   ],
   newpwd2: [
-    { required: true, message: '请确认新密码', trigger: 'blur' },
-    {
-      validator: (rule, value, callback) => {
-        if (value !== form.newpwd) {
-          callback(new Error('新密码与确认新密码不一致，请重新输入'))
-        } else {
-          callback()
-        }
-      },
-      trigger: 'blur'
-    }
+    { validator: (r,v,cb)=>{ if(!v) cb(new Error('请确认新密码')); else if(v!==form.newpwd) cb(new Error('新密码与确认新密码不一致')); else cb() }, trigger: 'blur' }
   ]
 }
 
@@ -145,4 +128,6 @@ function handleReset() {
 .page-title { font-size: 18px; font-weight: 600; color: #333; margin: 0 0 24px; }
 .pwd-form { max-width: 500px; }
 .pwd-hint { font-size: 12px; color: rgba(0,0,0,0.4); margin: 4px 0 0; line-height: 1.5; }
+.label-star { color: red; margin-right: 2px; }
+:deep(.el-form-item__label)::before { display: none !important; }
 </style>

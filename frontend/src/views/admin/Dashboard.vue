@@ -2,131 +2,93 @@
   <section class="page-section">
     <div class="dashboard">
       <!-- 我的信息 -->
-      <el-card shadow="never" class="my-info-card">
-        <div class="my-info">
-          <img class="my-avatar" :src="myInfo.image || defaultAvatar" alt="头像" />
-          <div class="my-detail">
-            <div class="my-greeting">您好，{{ myInfo.realname || '管理员' }}，今天也是元气满满的一天！</div>
-            <div class="my-meta">
-              <span>{{ myInfo.account || '-' }}</span>
-              <span class="meta-divider">|</span>
-              <span>{{ myInfo.roleName || myInfo.role || '-' }}</span>
-              <span class="meta-divider">|</span>
-              <span>{{ myInfo.deptName || myInfo.department || '-' }}</span>
-              <span class="meta-divider">|</span>
-              <span>{{ myInfo.postName || myInfo.job || '-' }}</span>
+      <div class="my-info-card">
+        <img class="my-avatar" :src="myInfo.image || defaultAvatar" alt="头像" />
+        <div class="my-text">
+          <div class="my-greeting">您好，{{ myInfo.realname || '管理员' }}，今天也是元气满满的一天！</div>
+          <div class="my-meta">
+            <span>{{ myInfo.account || '-' }}</span>
+            <span class="sep">|</span>
+            <span>{{ myInfo.roleName || myInfo.role || '-' }}</span>
+            <span class="sep">|</span>
+            <span>{{ myInfo.deptName || myInfo.department || '-' }}</span>
+            <span class="sep">|</span>
+            <span>{{ myInfo.postName || myInfo.job || '-' }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 数据概览 -->
+      <div class="section-title-row">
+        <span>数据概览</span>
+        <span class="update-time">数据更新：{{ today }}</span>
+      </div>
+      <div class="stat-cards">
+        <div class="stat-card" v-for="card in statCards" :key="card.label" @click="card.link && router.push(card.link)">
+          <span class="stat-num">{{ card.value }}<small>{{ card.unit }}</small></span>
+          <span class="stat-lbl">{{ card.label }}</span>
+        </div>
+      </div>
+
+      <!-- 数据统计 -->
+      <div class="section-title-row" style="margin-top:24px"><span>数据统计</span></div>
+      <div class="chart-area">
+        <div class="chart-dates">
+          <span v-for="d in chartDates" :key="d" class="date-chip">{{ d }}</span>
+        </div>
+        <div class="chart-bars">
+          <div v-for="(item,i) in revenueStats" :key="i" class="bar-col">
+            <div class="bar" :style="{ height: barHeight(item.revenue) }"></div>
+            <span class="bar-label">{{ item.month ? item.month.substring(5) : '' }}</span>
+          </div>
+          <div v-if="revenueStats.length===0" class="chart-empty">暂无数据</div>
+        </div>
+      </div>
+
+      <!-- 下半部分 -->
+      <div class="bottom-grid">
+        <!-- 快捷方式 -->
+        <div class="shortcut-card">
+          <div class="section-title-row"><span>快捷方式</span></div>
+          <div class="shortcut-list">
+            <div class="shortcut" @click="router.push('/Refund')">
+              <span class="shortcut-dot"></span><span>退款管理</span>
+            </div>
+            <div class="shortcut" @click="router.push('/Todo')">
+              <span class="shortcut-dot"></span><span>待办事项</span>
+            </div>
+            <div class="shortcut" @click="router.push('/Bill')">
+              <span class="shortcut-dot"></span><span>入账列表</span>
             </div>
           </div>
         </div>
-      </el-card>
-
-      <!-- 数据概览 -->
-      <el-card shadow="never" class="section-card">
-        <template #header>
-          <div class="card-header">
-            <span class="card-title">数据概览</span>
-            <span class="card-update">数据更新：{{ today }}</span>
-          </div>
-        </template>
-        <el-row :gutter="16" class="stats-row">
-          <el-col :span="4" v-for="card in statCards" :key="card.label">
-            <div class="stat-card" @click="card.link && router.push(card.link)">
-              <div class="stat-value">{{ card.value }}<small>{{ card.unit }}</small></div>
-              <div class="stat-label">{{ card.label }}</div>
-            </div>
-          </el-col>
-        </el-row>
-      </el-card>
-
-      <el-row :gutter="16" style="margin-top: 16px;">
-        <!-- 快捷方式 -->
-        <el-col :span="6">
-          <el-card shadow="never">
-            <template #header><span class="card-title">快捷方式</span></template>
-            <div class="shortcut-list">
-              <div class="shortcut-item" @click="router.push('/Refund')">
-                <el-icon :size="20"><CreditCard /></el-icon>
-                <span>退款管理</span>
-              </div>
-              <div class="shortcut-item" @click="router.push('/Todo')">
-                <el-icon :size="20"><Checked /></el-icon>
-                <span>待办事项</span>
-              </div>
-              <div class="shortcut-item" @click="router.push('/Bill')">
-                <el-icon :size="20"><DataAnalysis /></el-icon>
-                <span>入账列表</span>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
 
         <!-- 待办事项 -->
-        <el-col :span="9">
-          <el-card shadow="never">
-            <template #header><span class="card-title">待办事项</span></template>
-            <el-table :data="todoList" style="width: 100%" size="small" empty-text="暂无待办">
-              <el-table-column prop="applyNo" label="编号" width="150" />
-              <el-table-column prop="applyType" label="类型" width="90">
-                <template #default="{ row }">
-                  <el-tag size="small">{{ applyTypeMap[row.applyType] || row.applyType }}</el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column prop="createTime" label="时间" min-width="140" />
-            </el-table>
-          </el-card>
-        </el-col>
+        <div class="list-card">
+          <div class="section-title-row"><span>待办事项</span></div>
+          <div class="simple-list" v-if="todoList.length>0">
+            <div v-for="item in todoList" :key="item.id" class="list-row">
+              <span class="list-no">{{ item.applyNo }}</span>
+              <el-tag size="small" type="warning">{{ applyTypeMap[item.applyType] || item.applyType }}</el-tag>
+              <span class="list-time">{{ item.createTime }}</span>
+            </div>
+          </div>
+          <div v-else class="chart-empty">暂无待办</div>
+        </div>
 
         <!-- 预约总览 -->
-        <el-col :span="9">
-          <el-card shadow="never">
-            <template #header><span class="card-title">预约总览</span></template>
-            <el-table :data="appointmentList" style="width: 100%" size="small" empty-text="暂无预约">
-              <el-table-column prop="visitNo" label="编号" width="150" />
-              <el-table-column prop="visitorName" label="来访人" width="80" />
-              <el-table-column prop="appointmentTime" label="预约时间" min-width="130" />
-            </el-table>
-          </el-card>
-        </el-col>
-      </el-row>
-
-      <!-- 数据统计 & 老人统计 -->
-      <el-row :gutter="16" style="margin-top: 16px;">
-        <el-col :span="12">
-          <el-card shadow="never">
-            <template #header><span class="card-title">数据统计</span></template>
-            <div class="stat-list">
-              <div class="stat-item" v-for="item in revenueStats" :key="item.month">
-                <span>{{ item.month }}</span>
-                <span class="stat-count">¥{{ item.revenue || 0 }}</span>
-                <span class="stat-sub">{{ item.orderCount || 0 }}笔</span>
-              </div>
-              <div v-if="revenueStats.length === 0" class="empty-hint">暂无数据</div>
+        <div class="list-card">
+          <div class="section-title-row"><span>预约总览</span></div>
+          <div class="simple-list" v-if="appointmentList.length>0">
+            <div v-for="item in appointmentList" :key="item.id" class="list-row">
+              <span class="list-no">{{ item.visitNo }}</span>
+              <span class="list-name">{{ item.visitorName }}</span>
+              <span class="list-time">{{ item.appointmentTime }}</span>
             </div>
-          </el-card>
-        </el-col>
-        <el-col :span="12">
-          <el-card shadow="never">
-            <template #header><span class="card-title">老人统计</span></template>
-            <div v-if="levelStats.length === 0 && ageStats.length === 0" class="empty-hint">暂无数据</div>
-            <div v-else>
-              <h4 class="sub-title">护理等级分布</h4>
-              <div class="stat-list">
-                <div v-for="item in levelStats" :key="item.name" class="stat-item">
-                  <span>{{ item.name || '未知' }}</span>
-                  <span class="stat-count">{{ item.value }}人</span>
-                </div>
-              </div>
-              <h4 class="sub-title" style="margin-top: 12px;">年龄分布</h4>
-              <div class="stat-list">
-                <div v-for="item in ageStats" :key="item.name" class="stat-item">
-                  <span>{{ item.name }}</span>
-                  <span class="stat-count">{{ item.value }}人</span>
-                </div>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
+          </div>
+          <div v-else class="chart-empty">暂无预约</div>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -134,21 +96,17 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { CreditCard, Checked, DataAnalysis } from '@element-plus/icons-vue'
-import { getDashboardSummary, getDashboardTodo, getDashboardAppointments, getDashboardElderStats, getDashboardRevenueStats } from '@/api/admin'
+import { getDashboardSummary, getDashboardTodo, getDashboardAppointments, getDashboardRevenueStats } from '@/api/admin'
 import defaultAvatar from '@/assets/zhyl-user-avatar.png'
 
 const router = useRouter()
 const myInfo = ref({})
 const todoList = ref([])
 const appointmentList = ref([])
-const levelStats = ref([])
-const ageStats = ref([])
 const revenueStats = ref([])
 
 const today = computed(() => {
-  const d = new Date()
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 })
 
 const statCards = ref([
@@ -159,75 +117,72 @@ const statCards = ref([
   { label: '服务单数量', value: 0, unit: 'w笔', link: '/Order' }
 ])
 
+const chartDates = computed(() => revenueStats.value.map(r => r.month).reverse())
+
 const applyTypeMap = { CHECKIN: '入住申请', CHECKOUT: '退住申请', LEAVE: '请假申请' }
 
+function barHeight(rev) { const max=Math.max(...revenueStats.value.map(r=>r.revenue||0),1); return Math.max(4, (rev||0)/max*120)+'px' }
+
 onMounted(async () => {
-  // 我的信息 - 从 localStorage 或 API 加载
+  try { const c=localStorage.getItem('adminUser'); if(c) myInfo.value=JSON.parse(c) } catch(e){}
   try {
-    const cached = localStorage.getItem('adminUser')
-    if (cached) myInfo.value = JSON.parse(cached)
-  } catch (e) { /* ignore */ }
-
-  try {
-    const summary = await getDashboardSummary()
-    if (summary && summary.data) {
-      const d = summary.data
-      statCards.value[0].value = d.elderCount || 0
-      statCards.value[1].value = d.bedTotal || 0
-      statCards.value[2].value = d.employeeCount || 0
-      const revenue = d.monthRevenue || 0
-      statCards.value[3].value = (revenue / 10000).toFixed(1)
-      const orders = d.serviceOrderCount || 0
-      statCards.value[4].value = (orders / 10000).toFixed(1)
-    }
-  } catch (e) { /* ignore */ }
-
-  try { const res = await getDashboardTodo(); if (res?.data) todoList.value = res.data } catch (e) { /* ignore */ }
-  try { const res = await getDashboardAppointments(); if (res?.data) appointmentList.value = res.data } catch (e) { /* ignore */ }
-
-  try {
-    const res = await getDashboardElderStats()
-    if (res?.data) { levelStats.value = res.data.levelStats || []; ageStats.value = res.data.ageStats || [] }
-  } catch (e) { /* ignore */ }
-
-  try {
-    const res = await getDashboardRevenueStats()
-    if (res?.data) revenueStats.value = res.data
-  } catch (e) { /* ignore */ }
+    const s=await getDashboardSummary()
+    if(s?.data){ const d=s.data; statCards.value[0].value=d.elderCount||0; statCards.value[1].value=d.bedTotal||0; statCards.value[2].value=d.employeeCount||0; statCards.value[3].value=((d.monthRevenue||0)/10000).toFixed(1); statCards.value[4].value=((d.serviceOrderCount||0)/10000).toFixed(1) }
+  }catch(e){}
+  try{const r=await getDashboardTodo();if(r?.data)todoList.value=r.data}catch(e){}
+  try{const r=await getDashboardAppointments();if(r?.data)appointmentList.value=r.data}catch(e){}
+  try{const r=await getDashboardRevenueStats();if(r?.data)revenueStats.value=r.data}catch(e){}
 })
 </script>
 
 <style scoped>
-.dashboard { min-width: 0; }
+.dashboard { min-width:0; }
 
-.my-info-card { margin-bottom: 16px; }
-.my-info { display: flex; align-items: center; gap: 16px; }
-.my-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: #eef4ff; }
-.my-greeting { font-size: 15px; color: #333; margin-bottom: 6px; }
-.my-meta { font-size: 13px; color: rgba(0,0,0,0.5); display: flex; gap: 8px; align-items: center; }
-.meta-divider { color: #e7e9ed; }
+/* 我的信息 */
+.my-info-card { display:flex; align-items:center; gap:20px; padding:20px 24px; background:#fff; border:1px solid #e7e9ed; border-radius:8px; margin-bottom:20px; }
+.my-avatar { width:56px; height:56px; border-radius:50%; object-fit:cover; background:#eef4ff; flex-shrink:0; }
+.my-greeting { font-size:16px; color:#333; margin-bottom:6px; }
+.my-meta { display:flex; gap:8px; align-items:center; font-size:13px; color:rgba(0,0,0,0.5); }
+.sep { color:#e7e9ed; }
 
-.section-card { margin-bottom: 16px; }
-.card-header { display: flex; justify-content: space-between; align-items: center; }
-.card-title { font-size: 15px; font-weight: 600; color: #333; }
-.card-update { font-size: 12px; color: rgba(0,0,0,0.4); }
+/* section标题行 */
+.section-title-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:15px; font-weight:600; color:#333; }
+.update-time { font-size:12px; color:rgba(0,0,0,0.4); font-weight:400; }
 
-.stats-row { margin: 0 !important; }
-.stat-card { padding: 16px 12px; text-align: center; background: #fff; border: 1px solid #e7e9ed; border-radius: 6px; cursor: pointer; transition: box-shadow 0.2s; }
-.stat-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-.stat-value { font-size: 24px; font-weight: 600; color: #0052d9; line-height: 32px; }
-.stat-value small { font-size: 13px; font-weight: 400; color: rgba(0,0,0,0.6); }
-.stat-label { margin-top: 4px; font-size: 13px; color: rgba(0,0,0,0.6); }
+/* 统计卡片 */
+.stat-cards { display:flex; gap:16px; margin-bottom:8px; }
+.stat-card { flex:1; padding:24px 20px; text-align:center; background:#fff; border:1px solid #e7e9ed; border-radius:8px; cursor:pointer; transition:box-shadow 0.2s; }
+.stat-card:hover { box-shadow:0 2px 12px rgba(0,0,0,0.06); }
+.stat-num { font-size:32px; font-weight:600; color:#333; display:block; }
+.stat-num small { font-size:14px; font-weight:400; color:rgba(0,0,0,0.5); margin-left:4px; }
+.stat-lbl { font-size:13px; color:rgba(0,0,0,0.5); margin-top:8px; display:block; }
 
-.shortcut-list { display: flex; flex-direction: column; gap: 8px; }
-.shortcut-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #f5f7fa; border-radius: 6px; cursor: pointer; font-size: 14px; color: #333; transition: background 0.2s; }
-.shortcut-item:hover { background: #eef4ff; color: #0052d9; }
+/* 图表区 */
+.chart-area { padding:20px; background:#fff; border:1px solid #e7e9ed; border-radius:8px; }
+.chart-dates { display:flex; gap:8px; margin-bottom:16px; }
+.date-chip { padding:4px 12px; background:#f5f7fa; border-radius:4px; font-size:12px; color:rgba(0,0,0,0.6); }
+.chart-bars { display:flex; align-items:flex-end; gap:8px; height:140px; }
+.bar-col { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; }
+.bar { width:28px; background:linear-gradient(to top, #0052d9, #7298ff); border-radius:4px 4px 0 0; min-height:4px; transition:height 0.5s; }
+.bar-label { font-size:11px; color:rgba(0,0,0,0.4); margin-top:6px; }
+.chart-empty { padding:60px 0; text-align:center; color:rgba(0,0,0,0.3); font-size:13px; }
 
-.empty-hint { padding: 40px 0; text-align: center; color: rgba(0,0,0,0.35); font-size: 14px; }
-.sub-title { font-size: 13px; font-weight: 600; color: rgba(0,0,0,0.6); margin: 0 0 8px; }
+/* 下半部分三栏 */
+.bottom-grid { display:grid; grid-template-columns:180px 1fr 1fr; gap:16px; margin-top:20px; }
 
-.stat-list { display: flex; flex-wrap: wrap; gap: 8px; }
-.stat-item { display: flex; align-items: center; justify-content: space-between; width: calc(50% - 4px); padding: 8px 12px; background: #f5f7fa; border-radius: 4px; font-size: 13px; }
-.stat-count { font-weight: 600; color: #0052d9; }
-.stat-sub { font-size: 11px; color: rgba(0,0,0,0.4); }
+/* 快捷方式 */
+.shortcut-card { background:#fff; border:1px solid #e7e9ed; border-radius:8px; padding:16px 20px; }
+.shortcut-list { display:flex; flex-direction:column; gap:12px; }
+.shortcut { display:flex; align-items:center; gap:10px; font-size:14px; color:#333; cursor:pointer; padding:8px 12px; border-radius:4px; transition:background 0.2s; }
+.shortcut:hover { background:#f5f7fa; }
+.shortcut-dot { width:6px; height:6px; background:#0052d9; border-radius:50%; flex-shrink:0; }
+
+/* 列表卡片 */
+.list-card { background:#fff; border:1px solid #e7e9ed; border-radius:8px; padding:16px 20px; }
+.simple-list { display:flex; flex-direction:column; gap:8px; }
+.list-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #f5f7fa; font-size:13px; }
+.list-row:last-child { border-bottom:0; }
+.list-no { flex:1; color:#333; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.list-name { width:80px; color:#333; }
+.list-time { width:140px; color:rgba(0,0,0,0.4); text-align:right; }
 </style>
