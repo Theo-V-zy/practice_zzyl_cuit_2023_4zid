@@ -23,6 +23,11 @@
           </button>
         </nav>
 
+        <button class="bell-btn" type="button" @click="router.push('/Messages')" title="消息通知">
+            <el-icon :size="20"><Bell /></el-icon>
+            <span v-if="unreadCount > 0" class="bell-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
+          </button>
+
         <el-dropdown trigger="click" @command="handleUserCommand">
           <button class="user-trigger" type="button">
             <img class="user-avatar" :src="userImage || defaultAvatar" alt="管理员头像" />
@@ -95,7 +100,7 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getMenus, loadInfo, logout } from '@/api/admin'
+import { getMenus, loadInfo, logout, getMessagePage } from '@/api/admin'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   ArrowDown,
@@ -121,6 +126,7 @@ const route = useRoute()
 const router = useRouter()
 const realName = ref('')
 const userImage = ref('')
+const unreadCount = ref(0)
 const menuList = ref(prototypeNavigation)
 const activeModuleId = ref(1)
 
@@ -258,9 +264,18 @@ function handleUserCommand(command) {
 
 watch(() => route.path, syncModuleWithRoute, { immediate: true })
 
+function loadUnreadCount() {
+  getMessagePage({ page: 1, pageSize: 1, readStatus: 0 })
+    .then(res => { if (res) unreadCount.value = res.total || 0 })
+    .catch(() => {})
+}
+
 onMounted(() => {
   loadMenus()
   loadUserInfo()
+  loadUnreadCount()
+  // 每30秒刷新一次未读消息数
+  setInterval(loadUnreadCount, 30000)
 })
 </script>
 
@@ -376,6 +391,38 @@ onMounted(() => {
 
 .top-module.is-active::after {
   background: #0052d9;
+}
+
+.bell-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 64px;
+  padding: 0;
+  color: rgba(0, 0, 0, 0.5);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  margin-right: 4px;
+}
+.bell-btn:hover { color: #0052d9; }
+.bell-badge {
+  position: absolute;
+  top: 14px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  background: #e34d59;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  border-radius: 9px;
+  pointer-events: none;
 }
 
 .user-trigger {
