@@ -1,26 +1,30 @@
 <template>
-  <router-view/>
+  <router-view />
 </template>
 
 <style>
+:root {
+  color: #303133;
+  background: #f4f6f8;
+  font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+  font-size: 14px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  width: 100%;
+  min-width: 1024px;
+  min-height: 100%;
+  height: 100%;
+  margin: 0;
 }
 
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
+body {
+  background: #f4f6f8;
 }
 </style>
