@@ -52,7 +52,7 @@ export default {
           getApp().globalData.token = 'true'
           getApp().globalData.userInfo = res.data
           uni.showToast({ title: '登录成功', icon: 'success' })
-          uni.reLaunch({ url: '/pages/mine/mine' })
+          uni.switchTab({ url: '/pages/home/home' })
         }
       } catch (e) { /* error handled by request */ }
       finally { this.loading = false }
