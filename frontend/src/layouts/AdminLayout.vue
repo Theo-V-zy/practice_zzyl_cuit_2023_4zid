@@ -28,7 +28,7 @@
             <span v-if="unreadCount > 0" class="bell-badge">{{ unreadCount > 99 ? '99+' : unreadCount }}</span>
           </button>
 
-        <el-dropdown trigger="click" @command="handleUserCommand">
+        <el-dropdown trigger="click" @command="handleUserMenu">
           <button class="user-trigger" type="button">
             <img class="user-avatar" :src="userImage || defaultAvatar" alt="管理员头像" />
             <span>{{ realName || '管理员' }}</span>
@@ -98,7 +98,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getMenus, loadInfo, logout, getMessagePage } from '@/api/admin'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -129,8 +129,7 @@ const userImage = ref('')
 const unreadCount = ref(0)
 const menuList = ref(prototypeNavigation)
 const activeModuleId = ref(1)
-
-const expectedTopNames = ['工作台', '来访管理', '入退管理', '在住管理', '服务管理', '订单管理', '财务管理', '客户管理', '权限管理', '协同工作', '智能监测']
+let unreadTimer
 
 const iconMap = {
   工作台: House,
@@ -160,8 +159,7 @@ const topModules = computed(() => menuList.value.filter((item) => item.topVisibl
 const activeModule = computed(() => menuList.value.find((item) => item.id === activeModuleId.value) || topModules.value[0])
 const sideMenuItems = computed(() => {
   const module = activeModule.value
-  if (!module) return []
-  return hasChildren(module) ? childrenOf(module) : [module]
+  return module ? (hasChildren(module) ? childrenOf(module) : [module]) : []
 })
 const defaultOpeneds = computed(() => collectParentIds(sideMenuItems.value))
 
@@ -196,7 +194,10 @@ function firstPath(item) {
 
 function syncModuleWithRoute(path) {
   const matched = menuList.value.find((module) => containsPath(module, path))
-  if (matched) activeModuleId.value = matched.id
+  if (matched) {
+    activeModuleId.value = matched.id
+    nextTick(() => document.querySelector('.top-module.is-active')?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }))
+  }
 }
 
 function selectTopModule(module) {
@@ -205,24 +206,23 @@ function selectTopModule(module) {
 }
 
 function useServerMenus(data) {
-  if (!Array.isArray(data)) return false
-  const names = data.map((item) => item.mname)
-  return expectedTopNames.every((name) => names.includes(name))
+  // 只要服务端返回数组，就直接使用（服务端已按角色过滤）
+  return Array.isArray(data) && data.length > 0
 }
 
 function loadMenus() {
   getMenus()
     .then((data) => {
       if (useServerMenus(data)) {
-        const visibleTop = data
-          .filter((item) => expectedTopNames.includes(item.mname))
+        // 个人中心和消息中心不走侧栏，仅通过头像下拉和铃铛访问
+        const hideFromSidebar = ['个人中心', '消息中心']
+        menuList.value = data
+          .filter((item) => !hideFromSidebar.includes(item.mname))
           .sort((a, b) => (a.sort || 0) - (b.sort || 0))
           .map((item) => ({
             ...item,
             subItems: (item.subItems || []).sort((a, b) => (a.sort || 0) - (b.sort || 0))
           }))
-        const utilityMenus = prototypeNavigation.filter((item) => item.topVisible === false)
-        menuList.value = [...visibleTop, ...utilityMenus]
       }
       syncModuleWithRoute(route.path)
     })
@@ -242,21 +242,17 @@ function loadUserInfo() {
     .catch(() => {})
 }
 
-function handleUserCommand(command) {
+function handleUserMenu(command) {
   if (command === 'profile') router.push('/UserInfo')
   if (command === 'password') router.push('/ModifyPwd')
   if (command === 'messages') router.push('/Messages')
   if (command === 'logout') {
     ElMessageBox.confirm('确定要退出登录吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
+      confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning'
     }).then(() => {
       logout().finally(() => {
-        localStorage.clear()
-        sessionStorage.clear()
-        router.replace('/')
-        ElMessage.success('已退出登录')
+        localStorage.clear(); sessionStorage.clear()
+        router.replace('/'); ElMessage.success('已退出登录')
       })
     }).catch(() => {})
   }
@@ -274,8 +270,11 @@ onMounted(() => {
   loadMenus()
   loadUserInfo()
   loadUnreadCount()
-  // 每30秒刷新一次未读消息数
-  setInterval(loadUnreadCount, 30000)
+  unreadTimer = window.setInterval(loadUnreadCount, 30000)
+})
+
+onBeforeUnmount(() => {
+  window.clearInterval(unreadTimer)
 })
 </script>
 
@@ -292,7 +291,7 @@ onMounted(() => {
 
 .admin-header {
   display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
+  grid-template-columns: 218px minmax(0, 1fr);
   height: 64px;
   background: #f6f7f9;
   border-bottom: 1px solid #e7e9ed;
@@ -343,6 +342,7 @@ onMounted(() => {
   display: flex;
   min-width: 0;
   align-items: stretch;
+  background: #f6f7f9;
 }
 
 .top-navigation {
@@ -350,11 +350,12 @@ onMounted(() => {
   min-width: 0;
   flex: 1;
   align-items: stretch;
-  gap: 14px;
-  padding: 0 20px;
+  gap: 4px;
+  padding: 0 14px;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
+  background: #f6f7f9;
 }
 
 .top-navigation::-webkit-scrollbar {
@@ -363,7 +364,7 @@ onMounted(() => {
 
 .top-module {
   position: relative;
-  flex: 0 0 82px;
+  flex: 0 0 78px;
   height: 64px;
   padding: 0;
   color: rgba(0, 0, 0, 0.6);
@@ -449,7 +450,7 @@ onMounted(() => {
 
 .admin-workspace {
   display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
+  grid-template-columns: 218px minmax(0, 1fr);
   min-height: 0;
 }
 
@@ -506,7 +507,7 @@ onMounted(() => {
 .admin-content {
   min-width: 0;
   min-height: 0;
-  padding: 24px;
+  padding: 16px;
   overflow: auto;
   background: #f4f5f7;
 }
@@ -514,15 +515,13 @@ onMounted(() => {
 .content-inner {
   min-width: 0;
   min-height: 100%;
-  padding: 24px;
-  background: #fff;
-  border: 1px solid #e7e9ed;
+  background: transparent;
 }
 
 @media (max-width: 1200px) {
   .admin-header,
   .admin-workspace {
-    grid-template-columns: 210px minmax(0, 1fr);
+    grid-template-columns: 196px minmax(0, 1fr);
   }
   .brand-block {
     padding-right: 10px;
@@ -544,7 +543,7 @@ onMounted(() => {
     flex-basis: 76px;
   }
   .admin-content {
-    padding: 18px;
+    padding: 12px;
   }
 }
 </style>

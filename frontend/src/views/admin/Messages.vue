@@ -40,7 +40,7 @@
         </span>
       </div>
       <div class="toolbar-actions">
-        <el-button @click="handleBatchRead" :disabled="selectedIds.length === 0">全部已读</el-button>
+        <el-button @click="handleBatchRead">全部已读</el-button>
         <el-button type="danger" plain @click="handleDeleteAll">全部删除</el-button>
       </div>
     </div>
@@ -166,8 +166,10 @@ async function handleMarkRead(row) {
 }
 
 async function handleBatchRead() {
-  if (selectedIds.value.length === 0) { ElMessage.warning('请选择消息'); return }
-  await readMessageBatch(selectedIds.value)
+  // 标记当前页所有未读消息为已读
+  const unreadIds = tableData.value.filter(m => m.readStatus === 0).map(m => m.id)
+  if (unreadIds.length === 0) { ElMessage.warning('当前没有未读消息'); return }
+  await readMessageBatch(unreadIds)
   ElMessage.success('批量已读成功')
   loadData()
 }

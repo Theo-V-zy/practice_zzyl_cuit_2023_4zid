@@ -11,19 +11,15 @@ import java.util.UUID;
 @RestController
 public class FileController {
 
-    //注入文件上传工具类
     @Autowired
     private AliyunOssUtils aliyunOssUtils;
 
-    /*处理文件上传请求*/
     @RequestMapping("/upload")
     public String fileUpload(MultipartFile mf){
-
         try{
-            //获得原始的文件名
             String oldName = mf.getOriginalFilename();
-            String ext= oldName.substring(oldName.lastIndexOf("."));
-            String name= UUID.randomUUID().toString()+ext;
+            String ext = oldName.substring(oldName.lastIndexOf("."));
+            String name = UUID.randomUUID().toString() + ext;
             byte[] bytes = mf.getBytes();
             String path = aliyunOssUtils.uploadFile(name, bytes);
             return path;
@@ -32,8 +28,4 @@ public class FileController {
         }
         return "ok";
     }
-
-
 }
-
-

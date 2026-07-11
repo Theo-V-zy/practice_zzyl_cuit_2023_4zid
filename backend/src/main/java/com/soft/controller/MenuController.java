@@ -46,44 +46,47 @@ public class MenuController {
     }
 
     private List<Menu> filterMenus(List<Menu> allMenus, Set<Integer> allowedIds) {
-        // 收集所有需要保留的ID（包括允许菜单的所有祖先）
+        // 1. 先把树拍平成 Map<id, Menu>
+        Map<Integer, Menu> flatMap = new HashMap<>();
+        flattenTree(allMenus, flatMap);
+
+        // 2. 收集所有需要保留的ID（允许的 + 祖先链）
         Set<Integer> keepIds = new HashSet<>(allowedIds);
-        for (Menu menu : allMenus) {
-            if (allowedIds.contains(menu.getId())) {
-                // 向上追溯父节点
-                addParentChain(allMenus, menu.getPid(), keepIds);
+        for (Integer id : allowedIds) {
+            Menu m = flatMap.get(id);
+            while (m != null && m.getPid() != null && m.getPid() != 0) {
+                keepIds.add(m.getPid());
+                m = flatMap.get(m.getPid());
             }
         }
 
-        // 过滤并重建树
+        // 3. 从原始树中过滤重建
         List<Menu> filtered = new ArrayList<>();
         for (Menu menu : allMenus) {
-            if (keepIds.contains(menu.getId()) && menu.getPid() == 0) {
+            if (keepIds.contains(menu.getId())) {
                 Menu copy = copyMenu(menu);
-                copy.setSubItems(filterChildren(allMenus, keepIds, menu.getId()));
+                copy.setSubItems(filterChildrenFlat(allMenus, keepIds, menu.getId()));
                 filtered.add(copy);
             }
         }
         return filtered;
     }
 
-    private void addParentChain(List<Menu> allMenus, Integer pid, Set<Integer> keepIds) {
-        if (pid == null || pid == 0) return;
-        keepIds.add(pid);
-        for (Menu m : allMenus) {
-            if (m.getId().equals(pid)) {
-                addParentChain(allMenus, m.getPid(), keepIds);
-                break;
+    private void flattenTree(List<Menu> menus, Map<Integer, Menu> flat) {
+        for (Menu m : menus) {
+            flat.put(m.getId(), m);
+            if (m.getSubItems() != null) {
+                flattenTree(m.getSubItems(), flat);
             }
         }
     }
 
-    private List<Menu> filterChildren(List<Menu> allMenus, Set<Integer> keepIds, Integer parentId) {
+    private List<Menu> filterChildrenFlat(List<Menu> menus, Set<Integer> keepIds, Integer parentId) {
         List<Menu> children = new ArrayList<>();
-        for (Menu menu : allMenus) {
+        for (Menu menu : menus) {
             if (keepIds.contains(menu.getId()) && parentId.equals(menu.getPid())) {
                 Menu copy = copyMenu(menu);
-                copy.setSubItems(filterChildren(allMenus, keepIds, menu.getId()));
+                copy.setSubItems(filterChildrenFlat(menus, keepIds, menu.getId()));
                 children.add(copy);
             }
         }

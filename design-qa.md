@@ -1,40 +1,59 @@
 # Design QA
 
-- Source visual truth: `docs/design-evidence/source-workbench-desktop.png`, `docs/design-evidence/source-visit-desktop.png`
-- Implementation screenshot: `docs/design-evidence/implementation-workbench-1280.png`
-- Combined comparison: `docs/design-evidence/workbench-comparison.png`
-- Viewport: 1280 x 720 browser viewport; source application frame normalized to the same width
-- State: management shell, workbench selected; module switching additionally checked with visit management selected
+## Comparison Target
 
-## Full-view comparison evidence
+- Source visual truth: `/Users/ziyao_with_u/实训文档/zzyl-team-env/docs/ui-audit-2026-07-11/02-dashboard-source.png`
+- Implementation: `http://localhost:5175/#/Dashboard`
+- Implementation screenshot: `/Users/ziyao_with_u/实训文档/zzyl-team-env/docs/ui-audit-2026-07-11/final-dashboard-1280.png`
+- Full-view comparison: `/Users/ziyao_with_u/实训文档/zzyl-team-env/docs/ui-audit-2026-07-11/compare-dashboard.png`
+- Viewport: 1280 x 720 CSS pixels; browser capture 1081 x 720 pixels
+- State: authenticated administrator, live local API data
 
-The implementation now follows the prototype shell: a 64px horizontal primary-module header, a 232px white contextual sidebar, a light gray workspace, a white content panel, the Zhongzhou Elderly Care logo, and the administrator entry on the right. The whole page no longer requires horizontal scrolling; only the primary-module strip can scroll when the viewport is narrow.
+## Focused Evidence
 
-## Focused region comparison evidence
-
-Header and sidebar were checked separately because these are the shared surfaces every teammate will reuse. The source top-module order, sidebar hierarchy, logo treatment, typography scale, neutral palette, and selected menu state are represented in the implementation. Visit Management switches the sidebar to Reservation Visit, Reservation Registration, and Visit Registration without replacing the shell.
+- Login: `docs/ui-audit-2026-07-11/compare-login.png`
+- Role/menu permission: source `10-role-menu-source.png`, final `final-role-menu-1280.png`
+- User management: `docs/ui-audit-2026-07-11/compare-users.png`
+- Compact desktop: `after-dashboard-1024.png`, `after-users-1024.png`
 
 ## Findings
 
-- No actionable P0/P1/P2 mismatch remains in the shared navigation shell.
-- Dashboard business cards and charts are intentionally outside this QA target; the current content is a route placeholder for the responsible developer.
+- No actionable P0/P1/P2 mismatch remains.
+- Typography: Microsoft YaHei/PingFang-compatible Chinese UI stack, weight hierarchy, line height, and compact table text now follow the prototype's restrained admin density.
+- Spacing/layout: the top module navigation, contextual sidebar, dashboard section order, permission split panes, and compact 1024 layout match the source composition. Body and content scroll widths equal their client widths at 1024 and 1280.
+- Colors/tokens: white work surfaces, pale gray application background, blue active state, and low-saturation semantic status colors map to the source.
+- Images: the existing Zhongzhou logo and user avatar assets are used directly; no replacement SVG or placeholder illustration was introduced.
+- Copy/content: prototype module names and labels are retained. Dashboard values intentionally use live database values, so they differ from prototype sample numbers.
+- P3: when all live revenue values are zero, the trend line is correctly flat and therefore visually less expressive than the prototype sample chart.
 
-## Required fidelity surfaces
+## Comparison History
 
-- Fonts and typography: PingFang SC system stack, 14px navigation text, calligraphic Chinese logo fallback, and compact English subtitle match the source hierarchy.
-- Spacing and layout rhythm: 64px header, 232px sidebar, 24px workspace padding, and 40px sidebar rows match the captured shell proportions.
-- Colors and visual tokens: white sidebar, light gray header/workspace, dark neutral text, and blue selected state match the prototype family.
-- Image quality and asset fidelity: the original prototype logo mark and administrator avatar were copied locally; no hotlinks or handmade SVG replacements are used.
-- Copy and content: all 11 top-level module names and the prototype sidebar labels are preserved.
+### Pass 1 - blocked
 
-## Comparison history
+- P1: Dashboard used a full-width profile card, rectangular KPI cards, a bar chart, and a three-card lower row instead of the prototype's overview/info, trend/shortcut, list, and service-statistics hierarchy.
+- P1: Role management rendered large rounded cards instead of a dense role table and split permission workspace.
+- P2: Five KPI cards and wide user-table columns required horizontal movement at common desktop widths.
+- P2: Login page used a centered gradient marketing card instead of the prototype's light canvas and right-side account panel.
 
-- Earlier finding: the first implementation used a dark full-height sidebar containing every module and a utility-only top bar. This was a P1 structural mismatch.
-- Fix: moved the 11 primary modules to the top, limited the sidebar to the active module, restored the source logo and neutral palette, and retained responsive internal scrolling.
-- Post-fix evidence: `docs/design-evidence/implementation-workbench-1280.png`; module-switch DOM verification and browser console reported no errors.
+Fixes: rebuilt the dashboard with ECharts, restored the right-side information and shortcut columns, converted role cards to table rows, added a dedicated data-scope split view, made user columns responsive, and rebuilt login/individual-center styling.
 
-## Follow-up polish
+### Pass 2 - passed
 
-- Replace each placeholder with its assigned business page while keeping `AdminLayout.vue` unchanged.
+- Post-fix evidence: `final-dashboard-1280.png`, `final-role-menu-1280.png`, `final-users-1280.png`, `after-login-pass2.png`.
+- Dashboard tab switching and chart rerender tested.
+- Role selection and permission panel rendering tested.
+- Login submission and authenticated redirect tested.
+- 1024 and 1280 layout overflow checks passed.
+- Browser console errors checked: none in the final run.
+
+## Implementation Checklist
+
+- [x] Match prototype shell and module navigation
+- [x] Match dashboard information architecture
+- [x] Use real chart rendering and live API data
+- [x] Match login and personal-center composition
+- [x] Match permission table/tree composition
+- [x] Remove desktop horizontal overflow
+- [x] Verify build, interactions, and console
 
 final result: passed

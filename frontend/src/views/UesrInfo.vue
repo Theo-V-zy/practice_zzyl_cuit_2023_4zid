@@ -103,21 +103,21 @@ onMounted(() => loadData())
 </script>
 
 <style scoped>
-.page-title { font-size: 18px; font-weight: 600; color: #333; margin: 0 0 24px; }
-.profile-layout { display: flex; gap: 60px; align-items: flex-start; }
-.form-side { flex: 1; max-width: 480px; }
+.page-title { min-height: 42px; padding: 10px 14px; font-size: 15px; font-weight: 600; color: #333; margin: -4px 0 24px; background:#f5f6f8; }
+.profile-layout { display: flex; max-width: 820px; gap: 60px; align-items: flex-start; }
+.form-side { flex: 1; max-width: 520px; }
 .avatar-side { flex-shrink: 0; }
 .avatar-label { font-size: 14px; color: #333; margin-bottom: 8px; }
 .avatar-label::before { content: '*'; color: red; margin-right: 2px; }
 
 .avatar-uploader :deep(.el-upload) {
-  border: 1px dashed #d9d9d9; border-radius: 6px; cursor: pointer;
-  width: 160px; height: 160px; display: flex; align-items: center; justify-content: center; overflow: hidden;
+  border: 1px dashed #d9d9d9; border-radius: 2px; cursor: pointer;
+  width: 150px; height: 150px; display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
 .avatar-uploader :deep(.el-upload):hover { border-color: #0052d9; }
-.avatar-img { width: 160px; height: 160px; object-fit: cover; }
+.avatar-img { width: 150px; height: 150px; object-fit: cover; }
 .avatar-placeholder { display: flex; flex-direction: column; align-items: center; gap: 8px; color: rgba(0,0,0,0.35); font-size: 13px; }
-.avatar-tip { font-size: 12px; color: rgba(0,0,0,0.35); margin: 6px 0 0; max-width: 160px; text-align: left; }
+.avatar-tip { font-size: 12px; color: rgba(0,0,0,0.35); margin: 6px 0 0; max-width: 150px; text-align: left; }
 
 .readonly-text { color: rgba(0,0,0,0.45); line-height: 32px; }
 .readonly-field :deep(.el-input.is-disabled .el-input__wrapper) { background: #f5f7fa; box-shadow: none; }

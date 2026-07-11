@@ -8,6 +8,7 @@
           <el-input v-model="queryForm.roleName" placeholder="请输入" clearable size="small" @change="handleQuery" />
           <el-button type="primary" size="small" @click="handleAdd">新增角色</el-button>
         </div>
+        <div class="role-columns"><span>角色名称</span><span>角色状态</span><span>操作</span></div>
         <div class="role-items">
           <div
             v-for="r in tableData" :key="r.id"
@@ -16,6 +17,7 @@
             @click="selectRole(r)"
           >
             <div class="role-name">{{ r.roleName }}</div>
+            <el-tag :type="r.status===1?'success':'danger'" size="small">{{ r.status===1?'启用':'禁用' }}</el-tag>
             <div class="role-actions" @click.stop>
               <el-button size="small" type="danger" link @click="handleDelete(r)">删除</el-button>
               <el-button size="small" :type="r.status===1?'warning':'success'" link @click="handleToggle(r)">{{ r.status===1?'禁用':'启用' }}</el-button>
@@ -92,7 +94,14 @@ const formRules={ roleName:[{ required:true, message:'请输入角色名称', tr
 
 async function loadData() {
   loading.value=true
-  try { const res=await getRolePage({...queryForm}); if(res){tableData.value=res.data||[]; total.value=res.total||0} } finally { loading.value=false }
+  try {
+    const res=await getRolePage({...queryForm})
+    if(res){
+      tableData.value=res.data||[]
+      total.value=res.total||0
+      if(!selectedRole.value && tableData.value.length) selectRole(tableData.value[0])
+    }
+  } finally { loading.value=false }
 }
 async function loadMenus() {
   try { const res=await getMenuTree(); if(res?.data) menuTree.value=res.data } catch(e){}
@@ -159,22 +168,29 @@ onMounted(()=>{loadData();loadMenus()})
 </script>
 
 <style scoped>
-.role-layout { display:flex; gap:0; min-height:400px; }
-.list-panel { width:300px; flex-shrink:0; border-right:1px solid #e7e9ed; padding-right:16px; }
+.role-layout { display:flex; gap:0; min-height:560px; }
+.list-panel { width:410px; flex-shrink:0; border-right:1px solid #e7e9ed; padding-right:16px; }
 .panel-header { font-size:15px; font-weight:600; color:#333; margin-bottom:12px; }
-.panel-toolbar { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+.panel-toolbar { display:grid; grid-template-columns:minmax(0, 1fr) 92px; gap:8px; margin-bottom:12px; }
+.role-columns { display:grid; grid-template-columns:minmax(110px,1fr) 72px 138px; align-items:center; height:34px; padding:0 10px; color:#777d86; background:#f5f6f8; border:1px solid #e7e9ed; border-bottom:0; font-size:12px; }
 .role-items { max-height:500px; overflow-y:auto; }
-.role-item { padding:12px; border:1px solid #e7e9ed; border-radius:6px; margin-bottom:8px; cursor:pointer; transition:all 0.2s; }
-.role-item:hover { border-color:#0052d9; }
-.role-item.active { border-color:#0052d9; background:#eef4ff; }
-.role-name { font-size:14px; font-weight:600; color:#333; margin-bottom:8px; }
-.role-actions { display:flex; gap:4px; }
+.role-item { display:grid; grid-template-columns:minmax(110px,1fr) 72px 138px; min-height:42px; padding:0 10px; align-items:center; border:1px solid #e7e9ed; border-bottom:0; cursor:pointer; transition:all 0.2s; }
+.role-item:last-child { border-bottom:1px solid #e7e9ed; }
+.role-item:hover { background:#f7faff; }
+.role-item.active { background:#eef4ff; box-shadow:inset 3px 0 #3976d8; }
+.role-name { min-width:0; color:#4d535c; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
+.role-actions { display:flex; gap:0; }
+.role-actions :deep(.el-button + .el-button) { margin-left:6px; }
 .no-data { text-align:center; padding:40px 0; color:rgba(0,0,0,0.35); }
 
-.perm-panel { flex:1; min-width:0; padding-left:24px; }
+.perm-panel { flex:1; min-width:0; padding-left:20px; }
 .empty-perm { display:flex; align-items:center; justify-content:center; color:rgba(0,0,0,0.35); font-size:14px; }
 .perm-toolbar { display:flex; gap:8px; margin-bottom:12px; }
 .menu-tree-wrap { max-height:450px; overflow-y:auto; }
 .scope-group { display:flex; flex-direction:column; gap:12px; }
+@media (max-width: 1100px) {
+  .list-panel { width: 360px; }
+  .role-columns, .role-item { grid-template-columns:minmax(90px,1fr) 62px 132px; }
+}
 .scope-group :deep(.el-radio) { margin-right:0; }
 </style>

@@ -42,7 +42,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         result.put("code",400);
         String account=userDto.getAccount();
         QueryWrapper<User> wrapper=new QueryWrapper<>();
-        wrapper.eq("account",account);
+        // 支持账号或邮箱登录
+        wrapper.eq("account",account).or().eq("email",account);
         List<User> users = userMapper.selectList(wrapper);
         if(users==null || users.size()==0){
             result.put("msg",account+"账号不存在......");

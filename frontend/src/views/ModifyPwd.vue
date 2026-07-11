@@ -1,7 +1,8 @@
 <template>
   <section class="page-section">
+    <div class="pwd-box">
     <h3 class="page-title">修改密码</h3>
-    <el-form ref="formRef" :model="form" :rules="rules" label-width="100px" class="pwd-form" size="large">
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="110px" class="pwd-form">
       <el-form-item prop="oldpwd" label="原密码" :required="false">
         <template #label><span class="label-star">*</span> 原密码</template>
         <el-input v-model="form.oldpwd" type="password" placeholder="请输入" show-password />
@@ -20,6 +21,7 @@
         <el-button @click="handleReset">重置</el-button>
       </el-form-item>
     </el-form>
+    </div>
 
     <!-- 确认修改弹窗 -->
     <el-dialog v-model="confirmVisible" title="确认修改" width="420px" :close-on-click-modal="false">
@@ -125,9 +127,11 @@ function handleReset() {
 </script>
 
 <style scoped>
-.page-title { font-size: 18px; font-weight: 600; color: #333; margin: 0 0 24px; }
-.pwd-form { max-width: 500px; }
+.pwd-box { width:520px; margin:18vh auto 0; border:1px solid #e4e7ed; }
+.page-title { min-height:44px; padding:12px 18px; font-size:15px; font-weight:600; color:#333; margin:0 0 24px; background:#f5f6f8; }
+.pwd-form { padding:0 34px 22px 22px; }
 .pwd-hint { font-size: 12px; color: rgba(0,0,0,0.4); margin: 4px 0 0; line-height: 1.5; }
 .label-star { color: red; margin-right: 2px; }
 :deep(.el-form-item__label)::before { display: none !important; }
+@media (max-height: 720px) { .pwd-box { margin-top: 8vh; } }
 </style>
