@@ -1,7 +1,7 @@
 // 家属端小程序 API 请求封装
 const BASE_URL = 'http://localhost:8080'
 
-function request(options) {
+export function request(options) {
   return new Promise((resolve, reject) => {
     const token = getApp().globalData.token
     uni.request({
