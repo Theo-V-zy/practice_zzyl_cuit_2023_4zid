@@ -38,7 +38,13 @@ const routes = [
         component: ModifyPwd
       },
       { path: '/NursingItem', component: () => import('@/views/NursingItem.vue') },
-      { path: '/NursingPlain', component: () => import('@/views/NursingPlain.vue') }
+      { path: '/NursingPlain', component: () => import('@/views/NursingPlain.vue') },
+      { path: '/Customer', component: () => import('@/views/Customer.vue') },
+      { path: '/Todo', component: () => import('@/views/Todo.vue') },
+      { path: '/Application', component: () => import('@/views/Application.vue') },
+      { path: '/Device', component: () => import('@/views/Device.vue') },
+      { path: '/Alert', component: () => import('@/views/Alert.vue') },
+      { path: '/AlertRule', component: () => import('@/views/AlertRule.vue') }
     ]
   }
 ]
