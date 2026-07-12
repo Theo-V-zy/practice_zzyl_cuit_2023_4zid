@@ -35,7 +35,7 @@ public class AIChatController {
     @PostMapping("/stream")
     public SseEmitter chatStream(@RequestBody Map<String, Object> body) {
         String userMessage = (String) body.get("message");
-        // 获取历史消息（可选）
+
         @SuppressWarnings("unchecked")
         List<Map<String, String>> history = (List<Map<String, String>>) body.get("history");
 

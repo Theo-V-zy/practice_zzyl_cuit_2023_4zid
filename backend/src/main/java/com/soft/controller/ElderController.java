@@ -14,6 +14,15 @@ public class ElderController {
     @Autowired
     private ElderService elderService;
 
+    /* 下拉列表用 */
+    @GetMapping("/elderList")
+    public Map<String, Object> list() {
+        Map<String, Object> r = new HashMap<>();
+        r.put("code", 200);
+        r.put("data", elderService.list());
+        return r;
+    }
+
     @RequestMapping("/elders/page")
     public Map<String, Object> page(@RequestBody Map<String, Integer> params) {
         Integer pageNum = params.getOrDefault("pageNum", 1);

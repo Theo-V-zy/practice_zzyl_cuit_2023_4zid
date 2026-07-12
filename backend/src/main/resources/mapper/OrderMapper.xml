@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.soft.mapper.OrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.soft.pojo.Order">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="orderNo" column="order_no" jdbcType="VARCHAR"/>
+        <result property="familyId" column="family_id" jdbcType="INTEGER"/>
+        <result property="elderId" column="elder_id" jdbcType="INTEGER"/>
+        <result property="serviceItemId" column="service_item_id" jdbcType="INTEGER"/>
+        <result property="serviceName" column="service_name" jdbcType="VARCHAR"/>
+        <result property="quantity" column="quantity" jdbcType="INTEGER"/>
+        <result property="totalAmount" column="total_amount" jdbcType="DECIMAL"/>
+        <result property="payAmount" column="pay_amount" jdbcType="DECIMAL"/>
+        <result property="payStatus" column="pay_status" jdbcType="VARCHAR"/>
+        <result property="orderStatus" column="order_status" jdbcType="VARCHAR"/>
+        <result property="refundAmount" column="refund_amount" jdbcType="DECIMAL"/>
+        <result property="refundReason" column="refund_reason" jdbcType="VARCHAR"/>
+        <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, order_no, family_id, elder_id, service_item_id, service_name,
+        quantity, total_amount, pay_amount, pay_status, order_status,
+        refund_amount, refund_reason, create_time, update_time
+    </sql>
+</mapper>

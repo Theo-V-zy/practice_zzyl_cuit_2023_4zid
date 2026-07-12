@@ -42,6 +42,12 @@ frontend-family/dist/build/mp-weixin
 
 在微信开发者工具中选择“导入项目”，目录选择上述路径即可。
 
+开发者工具开启自动化端口后，可执行登录和四个主 Tab 的冒烟测试：
+
+```bash
+WECHAT_AUTOMATION_ENDPOINT=ws://127.0.0.1:9420 npm run test:smoke
+```
+
 ## 后端地址
 
 模拟器默认请求 `http://127.0.0.1:8080`。真机调试时，需要在登录前通过控制台设置电脑局域网地址：
