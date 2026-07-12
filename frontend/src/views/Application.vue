@@ -37,6 +37,8 @@
     <el-option value="APPROVED" label="已通过" />
     <el-option value="REJECTED" label="已拒绝" />
   </el-select>
+  老人姓名&nbsp;:&nbsp;
+  <el-input style="width:15%;margin-right: 20px" v-model="condForm.elderName" placeholder="老人姓名"/>
   <el-button type="primary" @click="loadApplyList">搜索</el-button>
   <hr/>
   <div style="text-align: left">
@@ -88,14 +90,17 @@ function openAddDialog() {
 }
 
 function saveApply() {
-  axios.post("/saveApply", form)
+  axios.post("/applies", form)
     .then(response => {
       if (response.data.code == 200) {
         dialogVisible.value = false;
         doApplyPage(1);
       }
-      ElMessage(response.data.msg);
-    }).catch(error => console.log(error));
+      ElMessage({message: response.data.msg, type: response.data.code == 200 ? 'success' : 'error'});
+    }).catch(error => {
+      ElMessage({message: '提交申请失败', type: 'error'});
+      console.log(error);
+    });
 }
 
 const condForm = reactive({
@@ -110,7 +115,10 @@ function loadApplyList() {
     .then(response => {
       applyList.value = response.data.data;
       total.value = response.data.total;
-    }).catch(error => console.log(error));
+    }).catch(error => {
+      ElMessage({message: '加载申请列表失败', type: 'error'});
+      console.log(error);
+    });
 }
 
 onMounted(() => { loadApplyList(); });

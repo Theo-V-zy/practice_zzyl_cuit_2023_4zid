@@ -25,7 +25,9 @@ public class ApplyController {
         Integer pageSize = (Integer) params.getOrDefault("pageSize", 10);
         String applyType = (String) params.getOrDefault("applyType", null);
         String status = (String) params.getOrDefault("status", null);
-        return applyService.queryApplyPage(pageNum, pageSize, applyType, status);
+        String elderName = (String) params.getOrDefault("elderName", null);
+        Integer applyUserId = params.get("applyUserId") != null ? (Integer) params.get("applyUserId") : null;
+        return applyService.queryApplyPage(pageNum, pageSize, applyType, status, elderName, applyUserId);
     }
 
     @PostMapping("/applies")

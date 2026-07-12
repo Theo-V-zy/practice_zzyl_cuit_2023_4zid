@@ -161,8 +161,11 @@ function saveCustomer() {
         cleanForm();
         doCustomerPage(1);
       }
-      ElMessage(response.data.msg);
-    }).catch(error => console.log(error));
+      ElMessage({message: response.data.msg || response.data, type: response.data.code == 200 ? 'success' : 'error'});
+    }).catch(error => {
+      ElMessage({message: '请求失败，请检查网络或联系管理员', type: 'error'});
+      console.log(error);
+    });
 }
 
 function showCustomerInfo(row) {
