@@ -110,9 +110,9 @@ const todoList = ref([]);
 const total = ref(0);
 
 function loadTodoList() {
-  axios.post("/applyPage", condForm)
+  axios.post("/applies/page", condForm)
     .then(response => {
-      todoList.value = response.data.applies;
+      todoList.value = response.data.data;
       total.value = response.data.total;
     }).catch(error => console.log(error));
 }

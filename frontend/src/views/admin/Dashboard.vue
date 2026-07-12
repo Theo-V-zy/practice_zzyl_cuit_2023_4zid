@@ -47,10 +47,6 @@
               <button v-for="item in statisticTabs" :key="item.value" :class="{ active: statisticTab === item.value }" type="button" @click="statisticTab = item.value; renderTrendChart()">{{ item.label }}</button>
             </div>
           </div>
-          <div class="time-switch">
-            <button v-for="item in timeTabs" :key="item" :class="{ active: timeTab === item }" type="button" @click="timeTab = item">{{ item }}</button>
-            <el-date-picker v-model="dateRange" type="daterange" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期" size="small" />
-          </div>
         </header>
         <div ref="trendChartRef" class="trend-chart" aria-label="业务趋势图"></div>
       </article>
@@ -195,35 +191,17 @@ function renderOverviewCharts() {
 
 function trendValues() {
   const field = statisticTab.value === 'revenue' ? 'revenue' : statisticTab.value === 'resident' ? 'elderCount' : 'orderCount'
-  let apiValues = revenueStats.value.map(item => Number(item[field] || 0))
-  // Filter by time tab
-  const now = new Date()
-  if (timeTab.value === '今日') {
-    apiValues = apiValues.length ? [apiValues[apiValues.length - 1] / 30] : [0]
-  } else if (timeTab.value === '本周') {
-    apiValues = apiValues.length ? [apiValues[apiValues.length - 1] / 4] : [0]
-  } else if (timeTab.value === '本月' && apiValues.length > 1) {
-    apiValues = [apiValues[apiValues.length - 1]]
-  }
+  const apiValues = revenueStats.value.map(item => Number(item[field] || 0))
   if (apiValues.length > 0 && apiValues.some(v => v > 0)) return apiValues
   const base = statisticTab.value === 'revenue' ? Number(summary.value.monthRevenue || 0) : statisticTab.value === 'resident' ? Number(summary.value.elderCount || 0) : Number(summary.value.serviceOrderCount || 0)
   return [base || 0]
-}
-
-function trendLabels() {
-  let data = revenueStats.value
-  if (timeTab.value === '本月' && data.length > 0) data = [data[data.length - 1]]
-  else if (timeTab.value === '本周') data = data.length ? [data[data.length - 1]] : data
-  else if (timeTab.value === '今日') data = data.length ? [data[data.length - 1]] : data
-  if (data.length > 0) return data.map(item => item.month?.slice(5) || item.month || '')
-  return ['本月']
 }
 
 function renderTrendChart() {
   if (!trendChartRef.value) return
   const chart = echarts.getInstanceByDom(trendChartRef.value) || registerChart(echarts.init(trendChartRef.value))
   const values = trendValues()
-  const labels = trendLabels()
+  const labels = revenueStats.value.length > 0 ? revenueStats.value.map(item => item.month?.slice(5) || item.month || '') : ['本月']
   const names = { revenue: '收益金额', resident: '入退人数', service: '服务次数' }
   chart.setOption({
     grid: { left: 40, right: 18, top: 24, bottom: 28 },
@@ -289,7 +267,6 @@ async function renderCharts() {
 
 watch(summary, renderCharts, { deep: true })
 watch(revenueStats, renderTrendChart, { deep: true })
-watch([timeTab, dateRange], () => { renderTrendChart() })
 
 onMounted(async () => {
   try { myInfo.value = JSON.parse(localStorage.getItem('adminUser') || '{}') } catch (error) { myInfo.value = {} }

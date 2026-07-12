@@ -106,9 +106,9 @@ const applyList = ref([]);
 const total = ref(0);
 
 function loadApplyList() {
-  axios.post("/applyPage", condForm)
+  axios.post("/applies/page", condForm)
     .then(response => {
-      applyList.value = response.data.applies;
+      applyList.value = response.data.data;
       total.value = response.data.total;
     }).catch(error => console.log(error));
 }
