@@ -254,7 +254,7 @@ function renderServiceCharts() {
       legend: { bottom: 0, icon: 'circle', itemWidth: 8, textStyle: { color: '#7a8088', fontSize: 11 } },
       series: [{
         type: 'pie', radius: ['48%', '68%'], center: ['50%', '43%'],
-        label: { show: true, position: 'inside', formatter: '{c}', fontSize: 12, color: '#fff' },
+        label: { show: true, position: 'outside', formatter: '{b} {c}', fontSize: 11, color: '#555b65' },
         emphasis: { label: { fontSize: 14, fontWeight: 'bold' } },
         data: item.names.map((name, index) => ({ name, value: item.values[index], itemStyle: { color: item.colors[index % item.colors.length] } }))
       }]
@@ -341,7 +341,7 @@ onBeforeUnmount(() => {
 .service-stat { min-width: 0; padding-top: 12px; border-right: 1px solid #edf0f3; }
 .service-stat:last-child { border-right: 0; }
 .service-stat h3 { margin: 0 18px; color: #59606a; font-size: 13px; font-weight: 500; }
-.service-chart { height: 210px; }
+.service-chart { height: 210px; overflow: visible; }
 @media (max-width: 1180px) {
   .dashboard-grid--top, .dashboard-grid--middle { grid-template-columns: minmax(0, 1fr) 260px; }
   .overview-list { grid-template-columns: repeat(3, minmax(110px, 1fr)); }
