@@ -404,6 +404,8 @@ DROP TABLE IF EXISTS `t_nursing_plain`;
 CREATE TABLE `t_nursing_plain` (
   `id` int NOT NULL AUTO_INCREMENT,
   `plainname` varchar(255) DEFAULT NULL,
+  `level_id` int DEFAULT NULL,
+  `level_name` varchar(255) DEFAULT NULL,
   `createtime` datetime DEFAULT NULL,
   `createuser` varchar(255) DEFAULT NULL,
   `islock` varchar(255) DEFAULT NULL,
