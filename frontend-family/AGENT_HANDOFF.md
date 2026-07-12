@@ -1,95 +1,33 @@
-# 家属端小程序 Agent 开发任务书
+# 家属端 Agent 维护说明
 
-家属端是 uni-app 微信小程序项目，由组长搭好框架、三个组员各自负责部分页面。
+家属端主体功能已经完成。后续 Agent 应先阅读本文件和 `README.md`，不要重新搭建工程或更换技术栈。
 
-## 项目启动
+## 固定约束
 
-用 **HBuilder X** 打开 `frontend-family/` 目录：
-1. 下载 [HBuilder X](https://www.dcloud.io/hbuilderx.html)
-2. 文件 → 导入 → 从本地目录导入 → 选择 `frontend-family/`
-3. 运行 → 运行到小程序模拟器 → 微信开发者工具
+- 技术栈：uni-app + Vue 3。
+- 页面目录：`frontend-family/pages/`。
+- 请求只能通过 `frontend-family/api/request.js`。
+- 家属接口统一使用 `/family` 前缀和 `X-Family-Token`。
+- 主导航固定为：首页、家人、服务、我的。
+- 主色 `#0052d9`，背景 `#f5f5f5`，内容块白色，圆角不超过 `12rpx`。
+- 原型项目 ID：`2dvxxe`。
 
-后端地址在 `api/request.js` 的 `BASE_URL`，默认 `http://localhost:8080`。
+## Agent 开始工作时
 
-## 页面分工
-
-| 负责人 | 页面 | 路径 |
-|--------|------|------|
-| 组长 | 登录、我的 | `pages/login/` `pages/mine/` |
-| 组员 A | 首页 | `pages/home/`（待创建） |
-| 组员 B | 服务 | `pages/service/`（待创建） |
-| 组员 C | 家人 | `pages/family/`（待创建） |
-
-`pages.json` 中登记新页面，tabBar 可按需扩展。
-
-## 组员 A Agent 提示词
-
-```
-请打开 frontend-family/AGENT_HANDOFF.md，我是组员 A，负责家属端首页。
-
-先检查 git 状态，确认在 feature/member-a-resident-flow 分支。
-
-我的任务：在 frontend-family/pages/ 下创建 home/ 目录，完成家属端首页。
-
-要求：
-- 使用 uni-app 原生组件（view/text/image/scroll-view）
-- 样式用 rpx 单位，颜色 #0052d9 主色
-- 网络请求用 ../../api/request.js 封装
-- 后端接口前缀 /family/
-- 参考原型：https://rp-java.itheima.net/zhyl/（家属端首页）
-
-完成后在 pages.json 注册页面并添加到 tabBar。
+```text
+请先阅读 frontend-family/README.md 和 frontend-family/AGENT_HANDOFF.md。
+检查 git status，不覆盖其他成员未提交的改动。
+修改后运行：cd frontend-family && npm run build:mp-weixin。
+涉及后端时运行：cd backend && mvn -q -DskipTests package。
+最后列出修改文件、验证结果和仍需人工测试的内容。
 ```
 
-## 组员 B Agent 提示词
+## 关键文件
 
-```
-请打开 frontend-family/AGENT_HANDOFF.md，我是组员 B，负责家属端服务。
+- `pages.json`：页面与四栏导航。
+- `api/request.js`：Token、后端地址和全部接口函数。
+- `backend/.../FamilyController.java`：家属业务接口与数据权限。
+- `backend/.../FamilyTokenService.java`：登录令牌生成和校验。
+- `database/family_completion.sql`：家属端演示数据。
 
-先检查 git 状态，确认在 feature/member-b-service-order 分支。
-
-我的任务：在 frontend-family/pages/ 下创建 service/ 目录，完成服务项目展示和下单页面。
-
-要求：
-- uni-app 原生组件，rpx 单位，#0052d9 主色
-- 网络请求用 ../../api/request.js
-- 后端接口前缀 /family/
-- 参考原型服务页面
-
-完成后在 pages.json 注册页面。
-```
-
-## 组员 C Agent 提示词
-
-```
-请打开 frontend-family/AGENT_HANDOFF.md，我是组员 C，负责家属端家人。
-
-先检查 git 状态，确认在 feature/member-c-customer-monitor 分支。
-
-我的任务：在 frontend-family/pages/ 下创建 family/ 目录，完成家人列表和绑定页面。
-
-要求：
-- uni-app 原生组件，rpx 单位，#0052d9 主色
-- 网络请求用 ../../api/request.js
-- 后端接口前缀 /family/
-- 参考原型家人页面
-
-完成后在 pages.json 注册页面。
-```
-
-## 开发规范
-
-- **样式**：rpx 单位，主色 `#0052d9`，背景 `#f4f5f7`，圆角 12-20rpx
-- **请求**：统一用 `api/request.js` 的 `request()` 函数
-- **路由**：新增页面在 `pages.json` 的 `pages` 数组中注册
-- **tabBar**：如需加底部导航，在 `pages.json` 的 `tabBar.list` 中添加
-- **后端接口**：组长维护 `FamilyController.java`，组员需要新接口时告诉组长
-- **不提交**：`node_modules/`、`dist/`、`unpackage/`
-
-## 原型地址
-
-```
-https://rp-java.itheima.net/zhyl/#id=2dvxxe&p=%E7%99%BB%E5%BD%95_1&g=1
-```
-
-项目 ID 是 `2dvxxe`（家属端），不是 `ps9caw`（管理端）。
+禁止把密码、Token 或正式服务器地址直接写进页面组件。
