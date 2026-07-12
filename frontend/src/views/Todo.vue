@@ -15,7 +15,7 @@
         <el-input v-model="approveForm.approveOpinion" type="textarea" :rows="3" placeholder="请输入审批意见" />
       </el-form-item>
       <el-form-item style="margin-left: 30%">
-        <el-button type="success" round @click="doApprove('已通过')">通过</el-button>
+        <el-button type="success" round @click="doApprove('APPROVED')">通过</el-button>
         <el-button type="danger" round @click="doApprove('已拒绝')">拒绝</el-button>
         <el-button type="warning" round @click="approveDialogVisible = false">取消</el-button>
       </el-form-item>
@@ -50,14 +50,16 @@
     <el-table-column prop="applyTime" label="申请时间" width="160"/>
     <el-table-column label="状态" width="90">
       <template #default="scope">
-        <span v-if="scope.row.status=='待审批'" style="color:orange;font-weight:bold">待审批</span>
-        <span v-else-if="scope.row.status=='已通过'" style="color:green">已通过</span>
+        <span v-if="scope.row.status=='PENDING'" style="color:orange;font-weight:bold">待审批</span>
+        <span v-else-if="scope.row.status=='APPROVED'" style="color:green">已通过</span>
+        <span v-else-if="scope.row.status=='REJECTED'" style="color:crimson">已驳回</span>
+        <span v-else-if="scope.row.status=='DONE'" style="color:dodgerblue">已完成</span>
         <span v-else style="color:red">已拒绝</span>
       </template>
     </el-table-column>
     <el-table-column label="操作" width="140">
       <template #default="scope">
-        <el-button v-if="scope.row.status=='待审批'" type="primary" size="small" @click="openApproveDialog(scope.row)">审批</el-button>
+        <el-button v-if="scope.row.status=='PENDING'" type="primary" size="small" @click="openApproveDialog(scope.row)">审批</el-button>
         <span v-else style="color:#999">--</span>
       </template>
     </el-table-column>
@@ -103,7 +105,7 @@ function doApprove(status) {
 }
 
 const condForm = reactive({
-  applyType: '', status: '待审批', elderName: '', pageNum: 1, pageSize: 10
+  applyType: '', status: 'PENDING', elderName: '', pageNum: 1, pageSize: 10
 });
 
 const todoList = ref([]);
