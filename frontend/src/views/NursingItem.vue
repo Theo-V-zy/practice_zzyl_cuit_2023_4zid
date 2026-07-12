@@ -124,13 +124,12 @@ import {ElMessage} from "element-plus";
     itemname:'',
     price:'',
     unit:'',
-    sort:'',
     islock:'',
     image:'',
     description:''
   });
   //声明变量保存处理添加和更新请求的url接口
-  var url=null;
+  let url=null;
   //定义函数打开护理项目信息对话框
   function openNursingItemDialog(){
     //当打开信息护理项目信息对话框的时候
@@ -166,7 +165,6 @@ import {ElMessage} from "element-plus";
     nursingItemForm.id="";
     nursingItemForm.itemname="";
     nursingItemForm.price="";
-    nursingItemForm.sort="";
     nursingItemForm.unit="";
     nursingItemForm.image="";
     nursingItemForm.description="";
@@ -211,7 +209,6 @@ import {ElMessage} from "element-plus";
     nursingItemForm.id=row.id;
     nursingItemForm.itemname=row.itemname;
     nursingItemForm.price=row.price;
-    nursingItemForm.sort=row.sort;
     nursingItemForm.unit=row.unit;
     nursingItemForm.image=row.image;
     nursingItemForm.description=row.description;
@@ -233,13 +230,13 @@ import {ElMessage} from "element-plus";
       }
       ElMessage(response.data.msg);
     })
-    .catch(errpr=>{
+    .catch(error=>{
       console.log(error);
     })
   }
   //定义函数实现状态的更新
   function updateIsLock(row){
-    var islockForm={
+    const islockForm={
       id:row.id
     }
 
