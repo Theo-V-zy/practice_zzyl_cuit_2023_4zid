@@ -157,8 +157,9 @@ const serviceCharts = [
 const applyTypeMap = { CHECKIN: '入住申请', CHECKOUT: '退住申请', LEAVE: '请假申请' }
 
 function formatNumber(value) {
-  if (value >= 10000) return `${(value / 10000).toFixed(1)}w`
-  return Number.isInteger(value) ? String(value) : value.toFixed(1)
+  const v = Number(value) || 0
+  if (v >= 10000) return `${(v / 10000).toFixed(1)}w`
+  return Number.isInteger(v) ? String(v) : v.toFixed(1)
 }
 
 function formatTime(value) {
