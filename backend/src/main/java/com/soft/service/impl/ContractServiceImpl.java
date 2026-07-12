@@ -6,14 +6,18 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.soft.mapper.ContractMapper;
 import com.soft.pojo.Contract;
 import com.soft.service.ContractService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ContractServiceImpl extends ServiceImpl<ContractMapper, Contract> implements ContractService {
+
+    @Autowired
+    private JdbcTemplate jdbc;
 
     @Override
     public Map<String, Object> queryContractPage(Integer pageNum, Integer pageSize, String status) {
@@ -21,8 +25,16 @@ public class ContractServiceImpl extends ServiceImpl<ContractMapper, Contract> i
         QueryWrapper<Contract> params = new QueryWrapper<>();
         params.eq(StringUtils.hasText(status), "status", status);
         params.orderByDesc("create_time");
-
         page = this.page(page, params);
+
+        for (Contract c : page.getRecords()) {
+            if (c.getElderId() != null) {
+                try { c.setElderName(jdbc.queryForObject("SELECT name FROM t_elder WHERE id=?", String.class, c.getElderId())); } catch (Exception e) {}
+            }
+            if (c.getBedId() != null) {
+                try { c.setBedNo(jdbc.queryForObject("SELECT bed_no FROM t_bed WHERE id=?", String.class, c.getBedId())); } catch (Exception e) {}
+            }
+        }
 
         Map<String, Object> result = new HashMap<>();
         result.put("code", 200);
