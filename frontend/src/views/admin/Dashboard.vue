@@ -139,7 +139,7 @@ const statCards = computed(() => [
   { label: '床位数量', value: Number(summary.value.bedTotal || 0), unit: '个', color: '#81d39b', max: Math.max(Number(summary.value.bedTotal || 0), 1), link: '/Bed' },
   { label: '服务单数量', value: Number(summary.value.serviceOrderCount || 0), unit: '笔', color: '#8f91df', max: Math.max(Number(summary.value.serviceOrderCount || 0), 10), link: '/Order' },
   { label: '员工数量', value: Number(summary.value.employeeCount || 0), unit: '人', color: '#f0cc76', max: Math.max(Number(summary.value.employeeCount || 0), 10), link: '/UserManage' },
-  { label: '收入金额', value: Number(summary.value.monthRevenue || 0) / 10000, unit: '万元', color: '#eb8b87', max: Math.max(Number(summary.value.monthRevenue || 0) / 10000, 10), link: '/Bill' }
+  { label: '收入金额', value: Number(summary.value.monthRevenue || 0).toFixed(2), unit: '元', color: '#eb8b87', max: Math.max(Number(summary.value.monthRevenue || 0), 1000), link: '/Bill' }
 ])
 const shortcuts = [
   { label: '入住办理', path: '/Apply', icon: markRaw(User) },
@@ -193,16 +193,16 @@ function renderOverviewCharts() {
 
 function trendValues() {
   const apiValues = revenueStats.value.map(item => Number(item.revenue || 0))
-  if (apiValues.length > 1 && apiValues.some(value => value > 0)) return apiValues
-  const base = statisticTab.value === 'revenue' ? Number(summary.value.monthRevenue || 0) / 10000 : statisticTab.value === 'resident' ? Number(summary.value.elderCount || 0) : Number(summary.value.serviceOrderCount || 0)
-  return [0.72, 0.88, 0.65, 1.12, 0.93, 1.28, 0.8].map((factor, index) => Math.max(0, Number((base * factor + (base ? 0 : index % 3)).toFixed(1))))
+  if (apiValues.length > 0 && apiValues.some(value => value > 0)) return apiValues
+  const base = statisticTab.value === 'revenue' ? Number(summary.value.monthRevenue || 0) : statisticTab.value === 'resident' ? Number(summary.value.elderCount || 0) : Number(summary.value.serviceOrderCount || 0)
+  return [base || 0]
 }
 
 function renderTrendChart() {
   if (!trendChartRef.value) return
   const chart = echarts.getInstanceByDom(trendChartRef.value) || registerChart(echarts.init(trendChartRef.value))
   const values = trendValues()
-  const labels = revenueStats.value.length > 1 ? revenueStats.value.map(item => item.month?.slice(5) || '') : ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+  const labels = revenueStats.value.length > 0 ? revenueStats.value.map(item => item.month?.slice(5) || item.month || '') : ['本月']
   const names = { revenue: '收益金额', resident: '入退人数', service: '服务次数' }
   chart.setOption({
     grid: { left: 40, right: 18, top: 24, bottom: 28 },
