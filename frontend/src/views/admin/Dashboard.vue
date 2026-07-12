@@ -139,7 +139,7 @@ const statCards = computed(() => [
   { label: '床位数量', value: Number(summary.value.bedTotal || 0), unit: '个', color: '#81d39b', max: Math.max(Number(summary.value.bedTotal || 0), 1), link: '/Bed' },
   { label: '服务单数量', value: Number(summary.value.serviceOrderCount || 0), unit: '笔', color: '#8f91df', max: Math.max(Number(summary.value.serviceOrderCount || 0), 10), link: '/Order' },
   { label: '员工数量', value: Number(summary.value.employeeCount || 0), unit: '人', color: '#f0cc76', max: Math.max(Number(summary.value.employeeCount || 0), 10), link: '/UserManage' },
-  { label: '收入金额', value: Number(summary.value.monthRevenue || 0).toFixed(2), unit: '元', color: '#eb8b87', max: Math.max(Number(summary.value.monthRevenue || 0), 1000), link: '/Bill' }
+  { label: '收入金额', value: Number(Number(summary.value.monthRevenue || 0).toFixed(2)), unit: '元', color: '#eb8b87', max: Math.max(Number(summary.value.monthRevenue || 0), 1000), link: '/Bill' }
 ])
 const shortcuts = [
   { label: '入住办理', path: '/Apply', icon: markRaw(User) },
