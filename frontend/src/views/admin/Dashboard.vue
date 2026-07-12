@@ -112,7 +112,7 @@ import { LineChart, PieChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import { Calendar, Checked, CreditCard, Document, Money, User } from '@element-plus/icons-vue'
-import { getDashboardSummary, getDashboardTodo, getDashboardAppointments, getDashboardRevenueStats, loadInfo } from '@/api/admin'
+import { getDashboardSummary, getDashboardTodo, getDashboardAppointments, getDashboardRevenueStats, getDashboardElderStats, loadInfo } from '@/api/admin'
 import defaultAvatar from '@/assets/zhyl-user-avatar.png'
 
 echarts.use([LineChart, PieChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer])
@@ -124,6 +124,7 @@ const myInfo = ref({})
 const todoList = ref([])
 const appointmentList = ref([])
 const revenueStats = ref([])
+const elderStats = ref({})
 const summary = ref({})
 const statisticTab = ref('revenue')
 const timeTab = ref('本周')
@@ -216,18 +217,47 @@ function renderTrendChart() {
 }
 
 function renderServiceCharts() {
+  // Get real elder stats from API
+  const levelData = elderStats.value?.levelStats || []
+  const ageData = elderStats.value?.ageStats || []
+  const levelNames = levelData.map(i => i.name || i.level || '未知')
+  const levelValues = levelData.map(i => i.value || i.count || 1)
+  const levelColors = ['#6b98e8', '#7bd3b3', '#f0bf70', '#e59a94', '#c0b0e8']
+  const ageNames = ageData.map(i => i.name || i.range || '未知')
+  const ageValues = ageData.map(i => i.value || i.count || 1)
+  const ageColors = ['#7aa5e8', '#91d6ae', '#e59a94', '#f0bf70']
+
   const options = {
-    level: { names: ['自理', '半护理', '全护理'], values: [36, 42, 22], colors: ['#6b98e8', '#7bd3b3', '#f0bf70'] },
-    age: { names: ['60-69岁', '70-79岁', '80岁以上'], values: [20, 46, 34], colors: ['#7aa5e8', '#91d6ae', '#e59a94'] },
-    capacity: { names: ['已服务', '可服务'], values: [Number(summary.value.serviceOrderCount || 0), Math.max(Number(summary.value.bedTotal || 0), 1)], colors: ['#7797dc', '#dce6f6'] }
+    level: {
+      names: levelNames.length ? levelNames : ['暂无数据'],
+      values: levelValues.length ? levelValues : [1],
+      colors: levelColors
+    },
+    age: {
+      names: ageNames.length ? ageNames : ['暂无数据'],
+      values: ageValues.length ? ageValues : [1],
+      colors: ageColors
+    },
+    capacity: {
+      names: ['已服务', '可服务'],
+      values: [Number(summary.value.serviceOrderCount || 0), Math.max(Number(summary.value.bedTotal || 0) - Number(summary.value.serviceOrderCount || 0), 1)],
+      colors: ['#7797dc', '#dce6f6']
+    }
   }
   dashboardRef.value?.querySelectorAll('.service-chart').forEach(element => {
     const item = options[element.dataset.service]
+    if (!item) return
     const chart = echarts.getInstanceByDom(element) || registerChart(echarts.init(element))
+    const total = item.values.reduce((a, b) => a + b, 0)
     chart.setOption({
-      tooltip: { trigger: 'item' },
+      tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
       legend: { bottom: 0, icon: 'circle', itemWidth: 8, textStyle: { color: '#7a8088', fontSize: 11 } },
-      series: [{ type: 'pie', radius: ['48%', '68%'], center: ['50%', '43%'], label: { show: false }, data: item.names.map((name, index) => ({ name, value: item.values[index], itemStyle: { color: item.colors[index] } })) }]
+      series: [{
+        type: 'pie', radius: ['48%', '68%'], center: ['50%', '43%'],
+        label: { show: true, position: 'outside', formatter: '{b}\n{c}' },
+        emphasis: { label: { fontSize: 14, fontWeight: 'bold' } },
+        data: item.names.map((name, index) => ({ name, value: item.values[index], itemStyle: { color: item.colors[index % item.colors.length] } }))
+      }]
     })
   })
 }
@@ -245,13 +275,14 @@ watch(revenueStats, renderTrendChart, { deep: true })
 onMounted(async () => {
   try { myInfo.value = JSON.parse(localStorage.getItem('adminUser') || '{}') } catch (error) { myInfo.value = {} }
   try { myInfo.value = await loadInfo() || myInfo.value } catch (error) { /* keep cached profile */ }
-  const [summaryRes, todoRes, appointmentRes, revenueRes] = await Promise.allSettled([
-    getDashboardSummary(), getDashboardTodo(), getDashboardAppointments(), getDashboardRevenueStats()
+  const [summaryRes, todoRes, appointmentRes, revenueRes, elderRes] = await Promise.allSettled([
+    getDashboardSummary(), getDashboardTodo(), getDashboardAppointments(), getDashboardRevenueStats(), getDashboardElderStats()
   ])
   if (summaryRes.status === 'fulfilled') summary.value = summaryRes.value?.data || {}
   if (todoRes.status === 'fulfilled') todoList.value = todoRes.value?.data || []
   if (appointmentRes.status === 'fulfilled') appointmentList.value = appointmentRes.value?.data || []
   if (revenueRes.status === 'fulfilled') revenueStats.value = revenueRes.value?.data || []
+  if (elderRes.status === 'fulfilled') elderStats.value = elderRes.value?.data || {}
   await renderCharts()
   resizeObserver = new ResizeObserver(() => charts.forEach(chart => chart.resize()))
   if (dashboardRef.value) resizeObserver.observe(dashboardRef.value)

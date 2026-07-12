@@ -110,19 +110,14 @@ public class DashboardController {
     public Map<String, Object> elderStats() {
         Map<String, Object> result = new HashMap<>();
         Map<String, Object> data = new HashMap<>();
-
         try {
-            // 按等级统计
             data.put("levelStats", jdbcTemplate.queryForList(
-                "SELECT COALESCE(ability_level, '未知') AS name, COUNT(*) AS value FROM t_elder WHERE status = 'IN' GROUP BY ability_level"));
-            // 按年龄统计
+                "SELECT ability_level AS name, COUNT(*) AS value FROM t_elder WHERE status='IN' AND ability_level IS NOT NULL GROUP BY ability_level"));
+        } catch (Exception e) { data.put("levelStats", new ArrayList<>()); }
+        try {
             data.put("ageStats", jdbcTemplate.queryForList(
-                "SELECT CASE WHEN TIMESTAMPDIFF(YEAR, birthday, NOW()) < 60 THEN '60岁以下' WHEN TIMESTAMPDIFF(YEAR, birthday, NOW()) BETWEEN 60 AND 69 THEN '60-69岁' WHEN TIMESTAMPDIFF(YEAR, birthday, NOW()) BETWEEN 70 AND 79 THEN '70-79岁' WHEN TIMESTAMPDIFF(YEAR, birthday, NOW()) BETWEEN 80 AND 89 THEN '80-89岁' ELSE '90岁以上' END AS name, COUNT(*) AS value FROM t_elder WHERE status = 'IN' AND birthday IS NOT NULL GROUP BY name"));
-        } catch (Exception e) {
-            data.put("levelStats", new ArrayList<>());
-            data.put("ageStats", new ArrayList<>());
-        }
-
+                "SELECT t.range_name AS name, COUNT(*) AS value FROM (SELECT CASE WHEN TIMESTAMPDIFF(YEAR,birthday,NOW())<70 THEN '60-69岁' WHEN TIMESTAMPDIFF(YEAR,birthday,NOW())<80 THEN '70-79岁' WHEN TIMESTAMPDIFF(YEAR,birthday,NOW())<90 THEN '80-89岁' ELSE '90岁以上' END AS range_name FROM t_elder WHERE status='IN' AND birthday IS NOT NULL) t GROUP BY t.range_name ORDER BY t.range_name"));
+        } catch (Exception e) { data.put("ageStats", new ArrayList<>()); }
         result.put("code", 200);
         result.put("data", data);
         return result;
@@ -132,14 +127,13 @@ public class DashboardController {
     public Map<String, Object> revenueStats() {
         Map<String, Object> result = new HashMap<>();
         List<Map<String, Object>> list = new ArrayList<>();
-
         try {
             list = jdbcTemplate.queryForList(
-                "SELECT DATE_FORMAT(create_time, '%Y-%m') AS month, COALESCE(SUM(pay_amount), 0) AS revenue, COUNT(*) AS orderCount FROM t_order WHERE pay_status = 'PAID' GROUP BY DATE_FORMAT(create_time, '%Y-%m') ORDER BY month DESC LIMIT 6");
-        } catch (Exception e) {
-            // ignore
-        }
-
+                "SELECT t.month, COALESCE(SUM(t.revenue),0) AS revenue, COALESCE(SUM(t.orderCount),0) AS orderCount, COALESCE(SUM(t.elderCount),0) AS elderCount " +
+                "FROM ( SELECT DATE_FORMAT(create_time,'%Y-%m') AS month, pay_amount AS revenue, 1 AS orderCount, 0 AS elderCount FROM t_order WHERE pay_status='PAID' " +
+                "UNION ALL SELECT DATE_FORMAT(create_time,'%Y-%m'), 0, 0, 1 FROM t_apply WHERE apply_type='CHECKIN' AND status='APPROVED' ) t " +
+                "GROUP BY t.month ORDER BY t.month ASC LIMIT 6");
+        } catch (Exception e) { /* fallback */ }
         result.put("code", 200);
         result.put("data", list);
         return result;
