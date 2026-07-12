@@ -38,7 +38,7 @@
       </div>
       <!-- 右侧头像 -->
       <div class="avatar-side">
-        <div class="avatar-label">*头像</div>
+        <div class="avatar-label">头像</div>
         <el-upload
           class="avatar-uploader"
           :show-file-list="false"

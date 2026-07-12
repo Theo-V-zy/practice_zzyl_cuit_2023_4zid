@@ -254,7 +254,7 @@ function renderServiceCharts() {
       legend: { bottom: 0, icon: 'circle', itemWidth: 8, textStyle: { color: '#7a8088', fontSize: 11 } },
       series: [{
         type: 'pie', radius: ['48%', '68%'], center: ['50%', '43%'],
-        label: { show: true, position: 'outside', formatter: '{b}\n{c}' },
+        label: { show: true, position: 'inside', formatter: '{c}', fontSize: 12, color: '#fff' },
         emphasis: { label: { fontSize: 14, fontWeight: 'bold' } },
         data: item.names.map((name, index) => ({ name, value: item.values[index], itemStyle: { color: item.colors[index % item.colors.length] } }))
       }]
@@ -271,6 +271,7 @@ async function renderCharts() {
 
 watch(summary, renderCharts, { deep: true })
 watch(revenueStats, renderTrendChart, { deep: true })
+watch([timeTab, dateRange], () => { renderTrendChart() })
 
 onMounted(async () => {
   try { myInfo.value = JSON.parse(localStorage.getItem('adminUser') || '{}') } catch (error) { myInfo.value = {} }
