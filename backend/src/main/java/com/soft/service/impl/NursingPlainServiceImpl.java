@@ -7,8 +7,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.soft.dto.NursingPlainDto;
 import com.soft.dto.NursingPlainPageDto;
 import com.soft.dto.PlainItemDto;
+import com.soft.mapper.NursimgItemMapper;
 import com.soft.mapper.PlainItemMapper;
 import com.soft.pojo.NursingPlain;
+import com.soft.pojo.NursimgItem;
 import com.soft.pojo.PlainItem;
 import com.soft.service.NursingPlainService;
 import com.soft.mapper.NursingPlainMapper;
@@ -36,6 +38,8 @@ public class NursingPlainServiceImpl extends ServiceImpl<NursingPlainMapper, Nur
     private NursingPlainMapper nursingPlainMapper;
     @Autowired
     private PlainItemMapper plainItemMapper;
+    @Autowired
+    private NursimgItemMapper nursimgItemMapper;
 
     @Transactional
     @Override
@@ -46,32 +50,57 @@ public class NursingPlainServiceImpl extends ServiceImpl<NursingPlainMapper, Nur
         result.put("msg","保存护理计划失败......");
 
         //1 保存护理计划信息
-        NursingPlain nursingPlain=new NursingPlain();
-        System.out.println("1-----"+nursingPlain.getId());
-        nursingPlain.setPlainname(nursingPlainDto.getPlainname());
-        nursingPlain.setCreatetime(new Date());
-        nursingPlain.setCreateuser("马云");
-        nursingPlain.setIslock("启动");
-        nursingPlainMapper.insert(nursingPlain);
-        //可以获得数据库自增的id
-        System.out.println("2-----"+nursingPlain.getId());
+        Integer plainId;
+        boolean isUpdate = nursingPlainDto.getId() != null;
+
+        if (isUpdate) {
+            // 编辑模式：更新已有计划，先删旧关联项再重建
+            plainId = nursingPlainDto.getId();
+            NursingPlain existing = nursingPlainMapper.selectById(plainId);
+            if (existing == null) {
+                result.put("msg","护理计划不存在......");
+                return result;
+            }
+            existing.setPlainname(nursingPlainDto.getPlainname());
+            existing.setLevelId(nursingPlainDto.getLevelId());
+            existing.setLevelName(nursingPlainDto.getLevelName());
+            nursingPlainMapper.updateById(existing);
+
+            QueryWrapper<PlainItem> wrapper = new QueryWrapper<>();
+            wrapper.eq("plain_id", plainId);
+            plainItemMapper.delete(wrapper);
+        } else {
+            NursingPlain nursingPlain=new NursingPlain();
+            System.out.println("1-----"+nursingPlain.getId());
+            nursingPlain.setPlainname(nursingPlainDto.getPlainname());
+            nursingPlain.setLevelId(nursingPlainDto.getLevelId());
+            nursingPlain.setLevelName(nursingPlainDto.getLevelName());
+            nursingPlain.setCreatetime(new Date());
+            nursingPlain.setCreateuser("马云");
+            nursingPlain.setIslock("启动");
+            nursingPlainMapper.insert(nursingPlain);
+            plainId = nursingPlain.getId();
+            System.out.println("2-----"+plainId);
+        }
 
 
         //获得当前的护理计划下的所有护理项
         List<PlainItemDto> plainItemList = nursingPlainDto.getPlainItemList();
-        plainItemList.forEach(item->{
-            //创建中间表对应的实体类对象
-            PlainItem plainItem=new PlainItem();
-            plainItem.setPlainId(nursingPlain.getId());
-            plainItem.setItemId(item.getItemid());
-            plainItem.setHlsj(item.getHlsj());
-            plainItem.setHlzq(item.getHlzq());
-            plainItem.setHlpc(item.getHlpc());
-            plainItem.setItemname(item.getHlmc());
-            //2 保存护理计划和护理项之间的关系
-            plainItemMapper.insert(plainItem);
+        if (plainItemList != null) {
+            plainItemList.forEach(item->{
+                //创建中间表对应的实体类对象
+                PlainItem plainItem=new PlainItem();
+                plainItem.setPlainId(plainId);
+                plainItem.setItemId(item.getItemid());
+                plainItem.setHlsj(item.getHlsj());
+                plainItem.setHlzq(item.getHlzq());
+                plainItem.setHlpc(item.getHlpc());
+                plainItem.setItemname(item.getHlmc());
+                //2 保存护理计划和护理项之间的关系
+                plainItemMapper.insert(plainItem);
 
-        });
+            });
+        }
         result.put("code",200);
         result.put("msg","保存护理计划成功......");
         return result;
@@ -105,6 +134,54 @@ public class NursingPlainServiceImpl extends ServiceImpl<NursingPlainMapper, Nur
 
         result.put("nursingPlains",nursingPlains);
         result.put("total",page.getTotal());
+        return result;
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> deleteNursingPlainService(Integer plainId) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 400);
+        result.put("msg", "删除护理计划失败......");
+
+        QueryWrapper<PlainItem> wrapper = new QueryWrapper<>();
+        wrapper.eq("plain_id", plainId);
+        plainItemMapper.delete(wrapper);
+
+        nursingPlainMapper.deleteById(plainId);
+
+        result.put("code", 200);
+        result.put("msg", "删除护理计划成功......");
+        return result;
+    }
+
+    @Override
+    public List<PlainItem> queryPlainItemsByPlainId(Integer plainId) {
+        QueryWrapper<PlainItem> wrapper = new QueryWrapper<>();
+        wrapper.eq("plain_id", plainId);
+        List<PlainItem> items = plainItemMapper.selectList(wrapper);
+        items.forEach(item -> {
+            if (item.getItemId() != null) {
+                NursimgItem nursingItem = nursimgItemMapper.selectById(item.getItemId());
+                if (nursingItem != null) {
+                    item.setPrice(nursingItem.getPrice());
+                    item.setUnit(nursingItem.getUnit());
+                }
+            }
+        });
+        return items;
+    }
+
+    @Override
+    public Map<String, Object> updateNursingPlainService(NursingPlain nursingPlain) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("code", 400);
+        result.put("msg", "更新护理计划失败......");
+
+        nursingPlainMapper.updateById(nursingPlain);
+
+        result.put("code", 200);
+        result.put("msg", "更新护理计划成功......");
         return result;
     }
 }

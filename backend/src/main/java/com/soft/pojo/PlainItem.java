@@ -51,5 +51,11 @@ public class PlainItem implements Serializable {
     private Integer hlpc;
 
     @TableField(exist = false)
+    private java.math.BigDecimal price;
+
+    @TableField(exist = false)
+    private String unit;
+
+    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

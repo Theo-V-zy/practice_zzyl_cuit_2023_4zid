@@ -13,5 +13,12 @@
     </noscript>
     <div id="app"></div>
     <!-- built files will be auto injected -->
+    <script>
+    window.addEventListener('error', function(e) {
+      if (e.message && e.message.includes('ResizeObserver')) {
+        e.stopImmediatePropagation();
+      }
+    }, true);
+    </script>
   </body>
 </html>

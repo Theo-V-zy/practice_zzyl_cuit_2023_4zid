@@ -13,18 +13,13 @@
         </el-form-item>
         <el-form-item label="价格">
           <el-input-number v-model="nursingItemForm.price"
-                           :precision="2" :step="0.1" :max="10" />
+                           :precision="2" :step="0.1" :max="200" />
         </el-form-item>
-        <el-form-item label="单位">
-          <el-input  v-model="nursingItemForm.unit" />
-        </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number
-              v-model="nursingItemForm.sort"
-              :min="1"
-              :max="10"
-              controls-position="right"
-          />
+        <el-form-item label="频率">
+          <el-select v-model="nursingItemForm.unit" placeholder="请选择频率" style="width:100%">
+            <el-option value="月" label="月"/>
+            <el-option value="日" label="日"/>
+          </el-select>
         </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="nursingItemForm.islock">
@@ -76,8 +71,7 @@
       <el-table-column type="index" width="50" />
       <el-table-column prop="itemname" label="名称"/>
       <el-table-column prop="price" label="价格"  width="100"/>
-      <el-table-column prop="unit" label="单位"  width="100"/>
-      <el-table-column prop="sort" label="排序"  width="100"/>
+      <el-table-column prop="unit" label="频率"  width="100"/>
       <el-table-column  label="图片">
         <template #default="scope">
           <img :src="scope.row.image" width="35px" height="35px"/>

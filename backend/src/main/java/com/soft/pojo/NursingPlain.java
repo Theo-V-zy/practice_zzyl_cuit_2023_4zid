@@ -24,6 +24,10 @@ public class NursingPlain implements Serializable {
     private Integer id;
 
     private String plainname;
+
+    private Integer levelId;
+    private String levelName;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date createtime;
 
