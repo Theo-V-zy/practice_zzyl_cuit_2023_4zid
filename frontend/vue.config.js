@@ -5,65 +5,18 @@ module.exports = defineConfig({
     host: '0.0.0.0',
     port: process.env.VUE_APP_PORT || 5173,
     proxy: {
-      '/login': { target: 'http://localhost:8080', changeOrigin: true },
-      '/logout': { target: 'http://localhost:8080', changeOrigin: true },
-      '/loadInfo': { target: 'http://localhost:8080', changeOrigin: true },
-      '/showInfo': { target: 'http://localhost:8080', changeOrigin: true },
-      '/sysMenus': { target: 'http://localhost:8080', changeOrigin: true },
-      '/upload': { target: 'http://localhost:8080', changeOrigin: true },
-      '/updateUser': { target: 'http://localhost:8080', changeOrigin: true },
-      '/updatePwd': { target: 'http://localhost:8080', changeOrigin: true },
-      '/nursingLevelList': { target: 'http://localhost:8080', changeOrigin: true },
-      '/saveNursingLevel': { target: 'http://localhost:8080', changeOrigin: true },
-      '/updateNursingLevel': { target: 'http://localhost:8080', changeOrigin: true },
-      '/deleteNursingLevel': { target: 'http://localhost:8080', changeOrigin: true },
-      '/orderPage': { target: 'http://localhost:8080', changeOrigin: true },
-      '/saveOrder': { target: 'http://localhost:8080', changeOrigin: true },
-      '/updateOrder': { target: 'http://localhost:8080', changeOrigin: true },
-      '/deleteOrder': { target: 'http://localhost:8080', changeOrigin: true },
-      '/orderInfo': { target: 'http://localhost:8080', changeOrigin: true },
-      '/orderPay': { target: 'http://localhost:8080', changeOrigin: true },
-      '/orderRefund': { target: 'http://localhost:8080', changeOrigin: true },
-      '/financeSummary': { target: 'http://localhost:8080', changeOrigin: true },
-      '/customerPage': { target: 'http://localhost:8080', changeOrigin: true },
-      '/saveCustomer': { target: 'http://localhost:8080', changeOrigin: true },
-      '/updateCustomer': { target: 'http://localhost:8080', changeOrigin: true },
-      '/deleteCustomer': { target: 'http://localhost:8080', changeOrigin: true },
-      '/devicePage': { target: 'http://localhost:8080', changeOrigin: true },
-      '/saveDevice': { target: 'http://localhost:8080', changeOrigin: true },
-      '/updateDevice': { target: 'http://localhost:8080', changeOrigin: true },
-      '/deleteDevice': { target: 'http://localhost:8080', changeOrigin: true },
-      '/updateDeviceLock': { target: 'http://localhost:8080', changeOrigin: true },
-      '/billPage': { target: 'http://localhost:8080', changeOrigin: true },
-      '/arrearsPage': { target: 'http://localhost:8080', changeOrigin: true },
-      '/prepay': { target: 'http://localhost:8080', changeOrigin: true },
-      '/balance': { target: 'http://localhost:8080', changeOrigin: true },
-      '/nursingTaskPage': { target: 'http://localhost:8080', changeOrigin: true },
-      '/saveNursingTask': { target: 'http://localhost:8080', changeOrigin: true },
-      '/deleteNursingTask': { target: 'http://localhost:8080', changeOrigin: true },
-      '/executeNursingTask': { target: 'http://localhost:8080', changeOrigin: true },
-      '/elderAssignmentPage': { target: 'http://localhost:8080', changeOrigin: true },
-      '/elderList': { target: 'http://localhost:8080', changeOrigin: true },
-      '/apply': { target: 'http://localhost:8080', changeOrigin: true },
-      '/applies': { target: 'http://localhost:8080', changeOrigin: true },
-      '/visits': { target: 'http://localhost:8080', changeOrigin: true },
-      '/visit': { target: 'http://localhost:8080', changeOrigin: true },
-      '/elders': { target: 'http://localhost:8080', changeOrigin: true },
-      '/beds': { target: 'http://localhost:8080', changeOrigin: true },
-      '/bed': { target: 'http://localhost:8080', changeOrigin: true },
-      '/contracts': { target: 'http://localhost:8080', changeOrigin: true },
-      '/contract': { target: 'http://localhost:8080', changeOrigin: true },
-      '/dashboard': { target: 'http://localhost:8080', changeOrigin: true },
-      '/messages': { target: 'http://localhost:8080', changeOrigin: true },
-      '/users': { target: 'http://localhost:8080', changeOrigin: true },
-      '/roles': { target: 'http://localhost:8080', changeOrigin: true },
-      '/menus': { target: 'http://localhost:8080', changeOrigin: true },
-      '/departments': { target: 'http://localhost:8080', changeOrigin: true },
-      '/posts': { target: 'http://localhost:8080', changeOrigin: true },
-      '/family': { target: 'http://localhost:8080', changeOrigin: true },
-      '/nursing': { target: 'http://localhost:8080', changeOrigin: true },
-      '/chat': { target: 'http://localhost:8080', changeOrigin: true },
-      '/api': { target: 'http://localhost:8080', changeOrigin: true, pathRewrite: { '^/api': '' } },
+      '^/': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        bypass(req) {
+          // 不代理前端静态资源和页面访问
+          const url = req.url
+          if (req.headers.accept?.includes('text/html')) return url
+          if (url.match(/\.(js|css|png|jpg|svg|ico|woff|ttf|map|json)(\?.*)?$/)) return url
+          if (url.startsWith('/__webpack') || url.startsWith('/sockjs')) return url
+          if (url === '/') return url
+        }
+      }
     }
   }
 })
