@@ -108,7 +108,7 @@ import { LineChart, PieChart } from 'echarts/charts'
 import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
 import { CanvasRenderer } from 'echarts/renderers'
 import { Calendar, Checked, CreditCard, Document, Money, User } from '@element-plus/icons-vue'
-import { getDashboardSummary, getDashboardTodo, getDashboardAppointments, getDashboardRevenueStats, getDashboardElderStats, loadInfo } from '@/api/admin'
+import { getDashboardSummary, getDashboardTodo, getDashboardAppointments, getDashboardRevenueStats, getDashboardElderStats, loadInfo, getMenus } from '@/api/admin'
 import defaultAvatar from '@/assets/zhyl-user-avatar.png'
 
 echarts.use([LineChart, PieChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer])
@@ -138,7 +138,7 @@ const statCards = computed(() => [
   { label: '员工数量', value: Number(summary.value.employeeCount || 0), unit: '人', color: '#f0cc76', max: Math.max(Number(summary.value.employeeCount || 0), 10), link: '/UserManage' },
   { label: '收入金额', value: Number(Number(summary.value.monthRevenue || 0).toFixed(2)), unit: '元', color: '#eb8b87', max: Math.max(Number(summary.value.monthRevenue || 0), 1000), link: '/Bill' }
 ])
-const shortcuts = [
+const allShortcuts = [
   { label: '入住办理', path: '/Apply', icon: markRaw(User) },
   { label: '退住办理', path: '/Checkout', icon: markRaw(Document) },
   { label: '待办事项', path: '/Todo', icon: markRaw(Checked) },
@@ -146,6 +146,8 @@ const shortcuts = [
   { label: '入账列表', path: '/Bill', icon: markRaw(Money) },
   { label: '退款管理', path: '/Refund', icon: markRaw(CreditCard) }
 ]
+const allowedPaths = ref([])
+const shortcuts = computed(() => allShortcuts.filter(s => allowedPaths.value.includes(s.path)))
 const serviceCharts = [
   { key: 'level', title: '老人等级分布' },
   { key: 'age', title: '老人年龄分布' },
@@ -279,6 +281,14 @@ onMounted(async () => {
   if (appointmentRes.status === 'fulfilled') appointmentList.value = appointmentRes.value?.data || []
   if (revenueRes.status === 'fulfilled') revenueStats.value = revenueRes.value?.data || []
   if (elderRes.status === 'fulfilled') elderStats.value = elderRes.value?.data || {}
+  // 加载菜单权限
+  try {
+    const menus = await getMenus()
+    const paths = []
+    function collectPaths(items) { items?.forEach(m => { if (m.path) paths.push(m.path); collectPaths(m.children) }) }
+    collectPaths(Array.isArray(menus) ? menus : menus?.data || menus || [])
+    allowedPaths.value = paths
+  } catch (e) { /* fallback: show all */ allowedPaths.value = allShortcuts.map(s => s.path) }
   await renderCharts()
   resizeObserver = new ResizeObserver(() => charts.forEach(chart => chart.resize()))
   if (dashboardRef.value) resizeObserver.observe(dashboardRef.value)
