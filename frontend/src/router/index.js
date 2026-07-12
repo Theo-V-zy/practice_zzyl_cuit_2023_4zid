@@ -64,7 +64,8 @@ const routes = [
       { path: '/RoleDataScope', name: 'RoleDataScope', meta: { title: '角色数据权限' }, component: () => import('@/views/admin/RoleDataScope.vue') },
       { path: '/MenuManage', name: 'MenuManage', meta: { title: '菜单管理' }, component: () => import('@/views/admin/MenuManage.vue') },
       { path: '/Department', name: 'Department', meta: { title: '部门管理' }, component: () => import('@/views/admin/Department.vue') },
-      { path: '/Post', name: 'Post', meta: { title: '职位管理' }, component: () => import('@/views/admin/Post.vue') }
+      { path: '/Post', name: 'Post', meta: { title: '职位管理' }, component: () => import('@/views/admin/Post.vue') },
+      { path: '/AIChat', name: 'AIChat', meta: { title: 'AI助手' }, component: () => import('@/views/admin/AIChat.vue') }
     ]
   }
 ]

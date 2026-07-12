@@ -6,6 +6,7 @@
 
 backend/target/
 backend/logs/
+backend/uploads/
 backend/src/main/resources/application-local.properties
 
 frontend/node_modules/

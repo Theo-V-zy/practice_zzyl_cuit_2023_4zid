@@ -12,7 +12,7 @@
 
     <view v-for="item in filteredList" :key="item.id" class="order-card" @tap="goDetail(item.id)">
       <view class="card-top">
-        <image class="card-img" :src="item.image || '/static/default-service.png'" mode="aspectFill" />
+        <image class="card-img" src="/static/default-service.png" mode="aspectFit" />
         <view class="card-info">
           <text class="card-title">{{ item.serviceName || '服务项目' }}</text>
           <text class="card-price">¥{{ formatPrice(item.totalAmount) }}</text>
@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import { familyOrders } from '../../api/request'
+import { familyOrders, payFamilyOrder, cancelFamilyOrder, refundFamilyOrder, deleteFamilyOrder } from '../../api/request'
 
 export default {
   data() {
@@ -89,17 +89,21 @@ export default {
     },
     switchTab(tab) { this.activeTab = tab },
     goDetail(id) { uni.navigateTo({ url: `/pages/order-detail/order-detail?id=${id}` }) },
-    goPay(item) { uni.showToast({ title: '跳转到支付页面', icon: 'none' }) },
+    goPay(item) { uni.showModal({ title: '模拟支付', content: `确认支付 ¥${this.formatPrice(item.totalAmount)}？`, success: async res => { if (!res.confirm) return; try { await payFamilyOrder(item.id); uni.showToast({ title: '支付成功', icon: 'success' }); this.loadData() } catch (e) {} } }) },
     cancelOrder(item) { this.currentItem = item; this.reasonTitle = '取消订单'; this.selectedReason = ''; this.showReason = true },
     refundOrder(item) { this.currentItem = item; this.reasonTitle = '申请退款'; this.selectedReason = ''; this.showReason = true },
     async confirmReason() {
       if (!this.selectedReason) { uni.showToast({ title: '请选择原因', icon: 'none' }); return }
       this.showReason = false
-      uni.showToast({ title: this.reasonTitle === '取消订单' ? '取消成功' : '提交成功', icon: 'success' })
-      this.loadData()
+      try {
+        if (this.reasonTitle === '取消订单') await cancelFamilyOrder(this.currentItem.id, this.selectedReason)
+        else await refundFamilyOrder(this.currentItem.id, this.selectedReason)
+        uni.showToast({ title: this.reasonTitle === '取消订单' ? '取消成功' : '退款已提交', icon: 'success' })
+        this.loadData()
+      } catch (e) {}
     },
     deleteOrder(item) {
-      uni.showModal({ title: '提示', content: '确定删除此订单？', success: res => { if (res.confirm) { uni.showToast({ title: '已删除', icon: 'success' }); this.loadData() } } })
+      uni.showModal({ title: '提示', content: '确定删除此订单？', success: async res => { if (!res.confirm) return; try { await deleteFamilyOrder(item.id); uni.showToast({ title: '已删除', icon: 'success' }); this.loadData() } catch (e) {} } })
     },
     statusText(s) {
       const m = { CREATED: '待支付', PAID: '待执行', SERVING: '待执行', FINISHED: '已完成', DONE: '已完成', REFUNDED: '已退款', CANCELED: '已关闭' }

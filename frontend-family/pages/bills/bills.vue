@@ -27,7 +27,7 @@ export default {
   onShow() { this.loadData() },
   methods: {
     async loadData() {
-      try { const res = await familyBills({ page: 1, pageSize: 50 }); if (res?.data) this.list = res.data } catch (e) {}
+      try { const res = await familyBills(); if (res?.data) this.list = res.data } catch (e) {}
     },
     formatPrice(v) { return v ? Number(v).toFixed(2) : '0.00' }
   }

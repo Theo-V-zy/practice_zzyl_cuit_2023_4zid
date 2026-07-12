@@ -11,7 +11,7 @@
     <view class="section">
       <view class="section-title">服务信息</view>
       <view class="info-card">
-        <image class="service-img" :src="detail.image || '/static/default-service.png'" mode="aspectFill" />
+        <image class="service-img" src="/static/default-service.png" mode="aspectFit" />
         <view class="service-info">
           <text class="service-name">{{ detail.serviceName || '-' }}</text>
           <text class="service-price">¥{{ formatPrice(detail.totalAmount) }}</text>
@@ -47,7 +47,7 @@
     <view class="section">
       <view class="section-title">养老院介绍</view>
       <view class="nursing-info">
-        <image class="nursing-img" :src="detail.nursingImage || '/static/default-place.png'" mode="aspectFill" @tap="previewImage(detail.nursingImage)" />
+        <image class="nursing-img" src="/static/default-place.png" mode="aspectFit" />
         <text class="nursing-name">中州养老</text>
         <text class="nursing-addr">北京市昌平区西三旗街道138号</text>
         <view class="nursing-tags">
@@ -75,7 +75,7 @@
 </template>
 
 <script>
-import { familyOrderDetail } from '../../api/request'
+import { familyOrderDetail, payFamilyOrder, cancelFamilyOrder, refundFamilyOrder } from '../../api/request'
 
 export default {
   data() {
@@ -108,10 +108,10 @@ export default {
     async loadDetail(id) {
       try { const res = await familyOrderDetail(id); if (res?.data) this.detail = res.data } catch (e) {}
     },
-    goPay() { uni.showToast({ title: '跳转支付', icon: 'none' }) },
-    cancelOrder() { uni.showToast({ title: '取消成功', icon: 'success' }) },
-    refundOrder() { uni.showToast({ title: '退款申请已提交', icon: 'success' }) },
-    contactService() { uni.showToast({ title: '请联系客服', icon: 'none' }) },
+    goPay() { uni.showModal({ title: '模拟支付', content: `确认支付 ¥${this.formatPrice(this.detail.totalAmount)}？`, success: async r => { if (!r.confirm) return; try { await payFamilyOrder(this.detail.id); uni.showToast({ title: '支付成功', icon: 'success' }); this.loadDetail(this.detail.id) } catch (e) {} } }) },
+    cancelOrder() { uni.showModal({ title: '取消订单', content: '确定取消当前订单吗？', success: async r => { if (!r.confirm) return; try { await cancelFamilyOrder(this.detail.id, '用户主动取消'); uni.showToast({ title: '取消成功', icon: 'success' }); this.loadDetail(this.detail.id) } catch (e) {} } }) },
+    refundOrder() { uni.showModal({ title: '申请退款', content: '退款将由工作人员审核处理，确定提交吗？', success: async r => { if (!r.confirm) return; try { await refundFamilyOrder(this.detail.id, '家属申请退款'); uni.showToast({ title: '退款已提交', icon: 'success' }); this.loadDetail(this.detail.id) } catch (e) {} } }) },
+    contactService() { uni.makePhoneCall({ phoneNumber: '0371-12345678' }) },
     previewImage(url) { if (url) uni.previewImage({ urls: [url] }) },
     formatPrice(v) { return v ? Number(v).toFixed(2) : '0.00' }
   }

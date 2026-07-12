@@ -467,6 +467,11 @@ INSERT INTO `t_family_user` (`id`, `account`, `password`, `name`, `phone`, `stat
 INSERT INTO `t_family_elder` (`family_id`, `elder_id`, `relation`, `is_default`, `status`) VALUES
 (1, 1, '子女', 1, 1);
 
+INSERT INTO `t_bill` (`bill_no`,`bill_type`,`elder_id`,`family_id`,`bill_month`,`fee_name`,`total_amount`,`paid_amount`,`status`) VALUES
+('ZD202607001','MONTHLY',1,1,'2026-07','床位护理月费',3000.00,3000.00,'PAID'),
+('ZD202607002','SERVICE',1,1,'2026-07','肩颈按摩服务',75.00,75.00,'PAID'),
+('ZD202607003','MONTHLY',1,1,'2026-08','床位护理月费',3000.00,0.00,'UNPAID');
+
 INSERT INTO `t_bed` (`id`, `building`, `floor`, `room_no`, `room_type`, `bed_no`, `bed_code`, `bed_price`, `elder_id`, `status`) VALUES
 (1, 'A栋', '3层', 'A301', '单人间', '1号床', 'BED-A301-1', 3000.00, 1, 'OCCUPIED'),
 (2, 'A栋', '3层', 'A302', '双人间', '1号床', 'BED-A302-1', 2000.00, NULL, 'EMPTY'),

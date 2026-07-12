@@ -11,7 +11,7 @@
         <text class="card-status" :class="statusClass(item.status)">{{ statusText(item.status) }}</text>
       </view>
       <view class="card-body">
-        <text class="card-row">家人：{{ item.familyName || '-' }}</text>
+        <text class="card-row">家人：{{ item.elderName || '-' }}</text>
         <text class="card-row">编号：{{ item.contractNo }}</text>
         <text class="card-row">有效期：{{ item.startDate }}~{{ item.endDate }}</text>
         <text class="card-row">签约日期：{{ item.signDate || '-' }}</text>
@@ -32,7 +32,7 @@ export default {
   onShow() { this.loadData() },
   methods: {
     async loadData() {
-      try { const res = await familyContracts({ page: 1, pageSize: 50 }); if (res?.data) this.list = res.data } catch (e) {}
+      try { const res = await familyContracts(); if (res?.data) this.list = res.data } catch (e) {}
     },
     statusText(s) {
       const m = { ACTIVE: '生效中', PENDING: '未生效', EXPIRED: '已过期', CANCELLED: '已失效' }
@@ -43,8 +43,8 @@ export default {
       if (s === 'PENDING') return 's-pending'
       return 's-expired'
     },
-    downloadContract(item) { uni.showToast({ title: '下载中...', icon: 'loading' }) },
-    viewContract(item) { uni.showToast({ title: '查看合同详情', icon: 'none' }) }
+    downloadContract() { uni.showToast({ title: '电子合同下载暂未接入', icon: 'none' }) },
+    viewContract(item) { uni.showModal({ title: item.contractNo, content: `${item.elderName || '家人'}\n${item.startDate} 至 ${item.endDate}\n月费 ¥${Number(item.monthlyFee || 0).toFixed(2)}`, showCancel: false }) }
   }
 }
 </script>

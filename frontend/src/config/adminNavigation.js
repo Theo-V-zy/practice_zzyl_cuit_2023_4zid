@@ -148,6 +148,12 @@ export const prototypeNavigation = [
     ]
   },
   {
+    id: 110,
+    mname: 'AI助手',
+    sort: 12,
+    subItems: [{ id: 111, mname: '智能问答', path: '/AIChat', sort: 1, subItems: [] }]
+  },
+  {
     id: 210,
     mname: '消息中心',
     topVisible: false,

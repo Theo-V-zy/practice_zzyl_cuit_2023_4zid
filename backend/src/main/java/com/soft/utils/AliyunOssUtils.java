@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.nio.file.Files;
 
 @Component
 public class AliyunOssUtils {
@@ -33,9 +31,18 @@ public class AliyunOssUtils {
     @Value("${aliyun.oss.region}")
     private String region;
 
+    public boolean isConfigured() {
+        return hasText(System.getenv("OSS_ACCESS_KEY_ID"))
+                && hasText(System.getenv("OSS_ACCESS_KEY_SECRET"));
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
+    }
+
 
     /*封装将本地文件上传到阿里云oss服务器*/
-    public String uploadFile(String objectName,byte[] content){
+    public String uploadFile(String objectName,byte[] content) {
         OSS ossClient=null;
         try{
 
@@ -44,7 +51,6 @@ public class AliyunOssUtils {
             EnvironmentVariableCredentialsProvider credentialsProvider
                     = CredentialsProviderFactory
                     .newEnvironmentVariableCredentialsProvider();
-            System.out.println(credentialsProvider);
 
             // 创建OSSClient实例。
             ClientBuilderConfiguration clientBuilderConfiguration =
@@ -59,9 +65,9 @@ public class AliyunOssUtils {
 
             ossClient.putObject(bucketName,objectName,new ByteArrayInputStream(content));
 
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }finally {
+        } catch (Exception exception) {
+            throw new IllegalStateException("OSS upload failed", exception);
+        } finally {
             if (ossClient != null) {
                 ossClient.shutdown();
             }

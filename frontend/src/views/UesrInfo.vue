@@ -30,7 +30,9 @@
             <el-input v-model="form.phone" maxlength="11" show-word-limit />
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="handleSave">保存</el-button>
+            <el-button type="primary" @click="handleSave" :disabled="uploading" :loading="saving">
+              {{ uploading ? '头像上传中...' : saving ? '保存中...' : '保存' }}
+            </el-button>
           </el-form-item>
         </el-form>
       </div>
@@ -39,12 +41,12 @@
         <div class="avatar-label">*头像</div>
         <el-upload
           class="avatar-uploader"
-          :action="uploadUrl"
           :show-file-list="false"
-          name="mf"
-          :on-success="handleAvatarSuccess"
+          :http-request="customUpload"
+          :before-upload="beforeAvatarUpload"
+          accept="image/png,image/jpeg"
         >
-          <img v-if="imageUrl" :src="imageUrl" class="avatar-img" />
+          <img v-if="imageUrl" :src="imageUrl" class="avatar-img" @error="handleAvatarError" />
           <div v-else class="avatar-placeholder">
             <el-icon :size="32"><Plus /></el-icon>
             <span>上传文件</span>
@@ -62,12 +64,13 @@ import { reactive, ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { showInfo, updateUser } from '@/api/admin'
-
-const uploadUrl = (process.env.VUE_APP_API_BASE_URL || 'http://localhost:8080') + '/upload'
+import request from '@/api/request'
 
 const form = reactive({ id: null, realname: '', email: '', sex: '男', phone: '', department: '', deptName: '', job: '', postName: '', role: '', roleName: '', image: '' })
 const imageUrl = ref(null)
 const formRef = ref(null)
+const uploading = ref(false)  // 上传 OSS 中
+const saving = ref(false)     // 保存到数据库
 
 function loadData() {
   showInfo().then(res => {
@@ -83,10 +86,44 @@ function loadData() {
   }).catch(() => {})
 }
 
-function handleAvatarSuccess(value) { imageUrl.value = value; form.image = value }
+// 选完文件立刻上传 OSS，拿到 URL 后才允许保存
+async function customUpload(options) {
+  uploading.value = true
+  try {
+    const formData = new FormData()
+    formData.append('mf', options.file)
+    const res = await request.post('/upload', formData, { timeout: 60000 })
+    const url = (typeof res === 'string') ? res : (res && (res.data || res.url || res))
+    if (url && typeof url === 'string' && url.startsWith('http')) {
+      imageUrl.value = url
+      form.image = url  // 暂存 URL，等保存时才入库
+      options.onSuccess?.(url)
+    } else {
+      throw new Error('返回异常: ' + JSON.stringify(res))
+    }
+  } catch (e) {
+    console.error('上传失败详情:', e)
+    const msg = e?.response?.data?.msg || e?.message || '未知错误'
+    ElMessage.error('头像上传失败: ' + msg)
+    options.onError?.(e)
+  } finally {
+    uploading.value = false
+  }
+}
 
+function beforeAvatarUpload(file) {
+  const typeAllowed = ['image/jpeg', 'image/png'].includes(file.type)
+  if (!typeAllowed) { ElMessage.warning('仅支持 PNG、JPG、JPEG 图片'); return false }
+  if (file.size > 2 * 1024 * 1024) { ElMessage.warning('图片大小不能超过 2MB'); return false }
+  // 立刻本地预览
+  imageUrl.value = URL.createObjectURL(file)
+  return true
+}
+
+// 只存入库，不上传（上传已在选文件时完成）
 function handleSave() {
   if (!form.realname.trim()) { ElMessage.warning('请输入姓名'); return }
+  saving.value = true
   updateUser({
     id: form.id, realname: form.realname, sex: form.sex, phone: form.phone, email: form.email, image: form.image
   }).then(res => {
@@ -96,7 +133,7 @@ function handleSave() {
       cached.realname = form.realname; cached.image = form.image
       localStorage.setItem('adminUser', JSON.stringify(cached))
     }
-  }).catch(() => {})
+  }).catch(() => {}).finally(() => { saving.value = false })
 }
 
 onMounted(() => loadData())

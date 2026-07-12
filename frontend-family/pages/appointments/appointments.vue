@@ -41,7 +41,7 @@
 </template>
 
 <script>
-import { familyAppointments } from '../../api/request'
+import { familyAppointments, cancelFamilyAppointment } from '../../api/request'
 
 export default {
   data() {
@@ -67,11 +67,11 @@ export default {
   onShow() { this.loadData() },
   methods: {
     async loadData() {
-      try { const res = await familyAppointments({ page: 1, pageSize: 50 }); if (res?.data) this.list = res.data } catch (e) {}
+      try { const res = await familyAppointments(); if (res?.data) this.list = res.data } catch (e) {}
     },
     switchTab(tab) { this.activeTab = tab },
     statusText(s) {
-      const m = { PENDING: '待上门', COMPLETED: '已完成', EXPIRED: '已过期', CANCELLED: '已取消' }
+      const m = { PENDING: '待上门', COMPLETED: '已完成', EXPIRED: '已过期', CANCELED: '已取消' }
       return m[s] || s
     },
     statusClass(s) {
@@ -80,11 +80,14 @@ export default {
       return 's-expired'
     },
     cancelApt(item) { this.currentItem = item; this.showCancel = true },
-    confirmCancel() {
-      this.cancelCount++
+    async confirmCancel() {
       this.showCancel = false
-      uni.showToast({ title: '取消成功', icon: 'success' })
-      this.loadData()
+      try {
+        await cancelFamilyAppointment(this.currentItem.id)
+        this.cancelCount++
+        uni.showToast({ title: '取消成功', icon: 'success' })
+        this.loadData()
+      } catch (e) {}
     }
   }
 }

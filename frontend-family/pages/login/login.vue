@@ -1,121 +1,24 @@
 <template>
-  <view class="login-container">
-    <view class="login-card">
-      <view class="login-logo-area">
-        <image class="login-logo" src="/static/logo.png" mode="aspectFit" />
-        <text class="login-title">中州养老</text>
-        <text class="login-subtitle">家属端</text>
-      </view>
-
-      <view class="login-form">
-        <view class="form-item">
-          <input class="form-input" v-model="account" placeholder="请输入账号" />
-        </view>
-        <view class="form-item">
-          <input class="form-input" v-model="password" type="password" placeholder="请输入密码" />
-        </view>
-        <button class="login-btn" :loading="loading" @tap="handleLogin">
-          {{ loading ? '登录中...' : '登 录' }}
-        </button>
-      </view>
-
-      <text class="login-tip">默认测试账号：family001 / 123456</text>
+  <view class="login-page">
+    <view class="brand"><image src="/static/logo.png" mode="aspectFit" /><text class="brand-name">中州养老</text><text class="brand-sub">家属端</text></view>
+    <view class="login-form">
+      <view class="input-row"><text>账号</text><input v-model.trim="form.account" placeholder="请输入账号" /></view>
+      <view class="input-row"><text>密码</text><input v-model="form.password" type="password" placeholder="请输入密码" confirm-type="done" @confirm="login" /></view>
+      <button class="login-btn" :loading="loading" @tap="login">登录</button>
+      <text class="demo">测试账号 family001 / 123456</text>
     </view>
   </view>
 </template>
 
 <script>
-import { familyLogin } from '../../api/request'
-
-export default {
-  data() {
-    return {
-      account: '',
-      password: '',
-      loading: false
-    }
-  },
-  methods: {
-    async handleLogin() {
-      if (!this.account) {
-        uni.showToast({ title: '请输入账号', icon: 'none' })
-        return
-      }
-      if (!this.password) {
-        uni.showToast({ title: '请输入密码', icon: 'none' })
-        return
-      }
-      this.loading = true
-      try {
-        const res = await familyLogin({ account: this.account, password: this.password })
-        if (res.code === 200 && res.data) {
-          getApp().globalData.token = 'true'
-          getApp().globalData.userInfo = res.data
-          uni.showToast({ title: '登录成功', icon: 'success' })
-          uni.reLaunch({ url: '/pages/mine/mine' })
-        }
-      } catch (e) { /* error handled by request */ }
-      finally { this.loading = false }
-    }
-  }
+import { familyLogin,setSession,getToken } from '../../api/request'
+export default{
+  data(){return{form:{account:'family001',password:'123456'},loading:false}},
+  onLoad(){if(getToken())uni.switchTab({url:'/pages/home/home'})},
+  methods:{async login(){if(!this.form.account||!this.form.password)return uni.showToast({title:'请输入账号和密码',icon:'none'});this.loading=true;try{const r=await familyLogin(this.form);setSession(r.data);uni.showToast({title:'登录成功',icon:'success'});setTimeout(()=>uni.switchTab({url:'/pages/home/home'}),400)}catch(e){}finally{this.loading=false}}}
 }
 </script>
 
 <style scoped>
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #0052d9, #3370ff);
-  padding: 40rpx;
-}
-.login-card {
-  width: 100%;
-  max-width: 600rpx;
-  padding: 60rpx 50rpx;
-  background: #fff;
-  border-radius: 20rpx;
-  box-shadow: 0 16rpx 64rpx rgba(0,0,0,0.12);
-}
-.login-logo-area {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 60rpx;
-}
-.login-logo { width: 100rpx; height: 100rpx; margin-bottom: 20rpx; }
-.login-title { font-size: 40rpx; font-weight: 600; color: #333; }
-.login-subtitle { font-size: 26rpx; color: rgba(0,0,0,0.45); margin-top: 8rpx; }
-.login-form { margin-top: 20rpx; }
-.form-item { margin-bottom: 24rpx; }
-.form-input {
-  width: 100%;
-  height: 88rpx;
-  padding: 0 24rpx;
-  border: 1px solid #e7e9ed;
-  border-radius: 12rpx;
-  font-size: 30rpx;
-  background: #f5f7fa;
-  box-sizing: border-box;
-}
-.login-btn {
-  width: 100%;
-  height: 88rpx;
-  line-height: 88rpx;
-  margin-top: 20rpx;
-  background: #0052d9;
-  color: #fff;
-  border-radius: 12rpx;
-  font-size: 32rpx;
-  letter-spacing: 8rpx;
-  border: none;
-}
-.login-tip {
-  display: block;
-  margin-top: 40rpx;
-  text-align: center;
-  color: rgba(0,0,0,0.3);
-  font-size: 24rpx;
-}
+.login-page{min-height:100vh;padding:180rpx 56rpx 60rpx;background:#f5f5f5}.brand{display:flex;flex-direction:column;align-items:center}.brand image{width:150rpx;height:120rpx}.brand-name{margin-top:12rpx;font-size:44rpx;font-weight:600}.brand-sub{margin-top:8rpx;color:#8f959e}.login-form{margin-top:80rpx}.input-row{height:96rpx;display:flex;align-items:center;border-bottom:1px solid #d8dbe2}.input-row text{width:100rpx;color:#4e5969}.input-row input{flex:1;height:96rpx}.login-btn{margin-top:56rpx;height:88rpx;line-height:88rpx;background:#0052d9;color:#fff;border-radius:8rpx}.demo{display:block;margin-top:30rpx;text-align:center;color:#a1a6ad;font-size:24rpx}
 </style>

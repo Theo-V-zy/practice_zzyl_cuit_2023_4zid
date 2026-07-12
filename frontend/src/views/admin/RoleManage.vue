@@ -40,10 +40,10 @@
             <div class="menu-tree-wrap">
               <el-tree
                 ref="menuTreeRef"
+                :key="selectedRole?.id"
                 :data="menuTree"
                 show-checkbox
                 node-key="id"
-                :default-checked-keys="checkedMenuIds"
                 default-expand-all
                 :props="{ label:'mname', children:'subItems', disabled:()=>!editMode }"
               />
@@ -110,10 +110,16 @@ function handleQuery(){loadData()}
 
 function selectRole(r){
   selectedRole.value=r
-  checkedMenuIds.value=r.menuIds?r.menuIds.split(',').map(Number):[]
+  const ids=r.menuIds?r.menuIds.split(',').map(Number).filter(id=>id):[]
+  checkedMenuIds.value=ids
   dataScope.value=r.dataScope||'ALL'
   activeTab.value='menu'
   editMode.value=false
+  // 用 setCheckedKeys 强制更新勾选，default-checked-keys 不可靠
+  if(menuTreeRef.value){
+    menuTreeRef.value.setCheckedKeys([])
+    setTimeout(()=>menuTreeRef.value.setCheckedKeys(ids), 50)
+  }
 }
 
 function handleAdd(){

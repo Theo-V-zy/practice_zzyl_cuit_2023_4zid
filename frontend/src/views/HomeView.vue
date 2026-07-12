@@ -122,7 +122,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { login } from '@/api/admin'
+import { login, loadInfo } from '@/api/admin'
 import logoMark from '@/assets/zhyl-logo-mark.png'
 
 const loginFormRef = ref(null)
@@ -156,7 +156,10 @@ async function handleLogin() {
       const storage = loginForm.remember ? localStorage : sessionStorage
       storage.setItem('rememberedAccount', loginForm.account)
       ElMessage.success('登录成功')
-      router.replace('/MainIndex')
+      // 登录后立刻加载用户信息并缓存，保证头像秒显示
+      loadInfo().then(data => {
+        if (data) localStorage.setItem('adminUser', JSON.stringify(data))
+      }).catch(() => {}).finally(() => router.replace('/MainIndex'))
     } else {
       ElMessage.error(res.msg || '登录失败')
     }

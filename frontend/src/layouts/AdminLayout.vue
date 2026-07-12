@@ -30,7 +30,7 @@
 
         <el-dropdown trigger="click" @command="handleUserMenu">
           <button class="user-trigger" type="button">
-            <img class="user-avatar" :src="userImage || defaultAvatar" alt="管理员头像" />
+            <img class="user-avatar" :src="userImage || defaultAvatar" alt="管理员头像" @error="handleUserAvatarError" />
             <span>{{ realName || '管理员' }}</span>
             <el-icon :size="13"><ArrowDown /></el-icon>
           </button>
@@ -111,6 +111,7 @@ import {
   DataAnalysis,
   House,
   Menu as MenuIcon,
+  ChatDotRound,
   Monitor,
   OfficeBuilding,
   Service,
@@ -151,6 +152,7 @@ const iconMap = {
   我的申请: DataAnalysis,
   设备管理: Monitor,
   报警管理: Bell,
+  AI助手: ChatDotRound,
   个人中心: User,
   消息中心: Bell
 }
@@ -230,16 +232,29 @@ function loadMenus() {
 }
 
 function loadUserInfo() {
+  // 先从缓存恢复，秒开头像
+  const cached = localStorage.getItem('adminUser')
+  if (cached) {
+    try {
+      const u = JSON.parse(cached)
+      realName.value = u.realname || ''
+      userImage.value = u.image || ''
+    } catch (e) { /* ignore */ }
+  }
+  // 再从接口刷新
   loadInfo()
     .then((data) => {
       if (data && data.realname) {
         realName.value = data.realname
         userImage.value = data.image || ''
-        // 保存到localStorage用于其他页面
         localStorage.setItem('adminUser', JSON.stringify(data))
       }
     })
     .catch(() => {})
+}
+
+function handleUserAvatarError() {
+  userImage.value = ''
 }
 
 function handleUserMenu(command) {
