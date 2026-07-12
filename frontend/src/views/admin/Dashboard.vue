@@ -193,7 +193,8 @@ function renderOverviewCharts() {
 }
 
 function trendValues() {
-  const apiValues = revenueStats.value.map(item => Number(item.revenue || 0))
+  const field = statisticTab.value === 'revenue' ? 'revenue' : statisticTab.value === 'resident' ? 'elderCount' : 'orderCount'
+  const apiValues = revenueStats.value.map(item => Number(item[field] || 0))
   if (apiValues.length > 0 && apiValues.some(value => value > 0)) return apiValues
   const base = statisticTab.value === 'revenue' ? Number(summary.value.monthRevenue || 0) : statisticTab.value === 'resident' ? Number(summary.value.elderCount || 0) : Number(summary.value.serviceOrderCount || 0)
   return [base || 0]
