@@ -7,11 +7,10 @@
         <id property="id" column="id" jdbcType="INTEGER"/>
         <result property="levelName" column="level_name" jdbcType="VARCHAR"/>
         <result property="description" column="description" jdbcType="VARCHAR"/>
-        <result property="sort" column="sort" jdbcType="INTEGER"/>
         <result property="islock" column="islock" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, level_name, description, sort, islock
+        id, level_name, description, islock
     </sql>
 </mapper>

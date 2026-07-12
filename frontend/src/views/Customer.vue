@@ -26,16 +26,17 @@
         </el-select>
       </el-form-item>
       <el-form-item label="跟进内容">
-        <el-input v-model="form.followUpContent" type="textarea" :rows="3" />
+        <el-input v-model="form.followContent" type="textarea" :rows="3" />
       </el-form-item>
       <el-form-item label="下次跟进时间">
-        <el-date-picker v-model="form.nextFollowUpTime" type="datetime" placeholder="选择时间" style="width:100%" value-format="YYYY-MM-DD HH:mm:ss" />
+        <el-date-picker v-model="form.nextFollowTime" type="datetime" placeholder="选择时间" style="width:100%" value-format="YYYY-MM-DD HH:mm:ss" />
       </el-form-item>
-      <el-form-item label="状态">
-        <el-radio-group v-model="form.islock">
-          <el-radio value="启用">启用</el-radio>
-          <el-radio value="禁用">禁用</el-radio>
-        </el-radio-group>
+      <el-form-item label="跟进状态">
+        <el-select v-model="form.status" placeholder="请选择" style="width:100%">
+          <el-option value="FOLLOWING" label="跟进中" />
+          <el-option value="DEAL" label="已成交" />
+          <el-option value="LOST" label="已流失" />
+        </el-select>
       </el-form-item>
       <el-form-item style="margin-left: 40%">
         <el-button type="primary" round @click="saveCustomer">确认</el-button>
@@ -84,13 +85,14 @@
       </template>
     </el-table-column>
     <el-table-column prop="source" label="来源" width="100"/>
-    <el-table-column prop="followUpContent" label="跟进内容" min-width="180" show-overflow-tooltip/>
-    <el-table-column prop="nextFollowUpTime" label="下次跟进" width="160"/>
-    <el-table-column prop="createUser" label="创建人" width="90"/>
+    <el-table-column prop="followContent" label="跟进内容" min-width="180" show-overflow-tooltip/>
+    <el-table-column prop="nextFollowTime" label="下次跟进" width="160"/>
+    <el-table-column prop="createTime" label="创建时间" width="160"/>
     <el-table-column label="状态" width="80">
       <template #default="scope">
-        <span v-if="scope.row.islock=='启用'" style="color:dodgerblue">启用</span>
-        <span v-else style="color:crimson">禁用</span>
+        <el-tag v-if="scope.row.status==='FOLLOWING'" type="warning">跟进中</el-tag>
+        <el-tag v-else-if="scope.row.status==='DEAL'" type="success">已成交</el-tag>
+        <el-tag v-else type="info">{{ scope.row.status }}</el-tag>
       </template>
     </el-table-column>
     <el-table-column label="操作" width="200">
@@ -114,7 +116,7 @@ var url = null;
 
 const form = reactive({
   id: '', name: '', phone: '', intentionLevel: '', source: '',
-  followUpContent: '', nextFollowUpTime: '', islock: '', createUser: '马云'
+  followContent: '', nextFollowTime: '', status: ''
 });
 
 function openAddDialog() {
@@ -125,12 +127,12 @@ function openAddDialog() {
 
 function cleanForm() {
   form.id = ''; form.name = ''; form.phone = ''; form.intentionLevel = '';
-  form.source = ''; form.followUpContent = ''; form.nextFollowUpTime = '';
-  form.islock = '';
+  form.source = ''; form.followContent = ''; form.nextFollowTime = '';
+  form.status = '';
 }
 
 const condForm = reactive({
-  name: '', intentionLevel: '', source: '', islock: '', pageNum: 1, pageSize: 10
+  name: '', intentionLevel: '', source: '', status: '', pageNum: 1, pageSize: 10
 });
 
 const customerList = ref([]);
@@ -166,8 +168,8 @@ function saveCustomer() {
 function showCustomerInfo(row) {
   form.id = row.id; form.name = row.name; form.phone = row.phone;
   form.intentionLevel = row.intentionLevel; form.source = row.source;
-  form.followUpContent = row.followUpContent; form.nextFollowUpTime = row.nextFollowUpTime;
-  form.islock = row.islock;
+  form.followContent = row.followContent; form.nextFollowTime = row.nextFollowTime;
+  form.status = row.status;
   dialogVisible.value = true;
   url = "/updateCustomer";
 }

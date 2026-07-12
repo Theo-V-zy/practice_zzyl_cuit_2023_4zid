@@ -15,7 +15,6 @@ public class NursingLevel implements Serializable {
 
     private String levelName;
     private String description;
-    private Integer sort;
     private String islock;
 
     @TableField(exist = false)

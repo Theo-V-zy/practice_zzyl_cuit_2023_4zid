@@ -8,7 +8,7 @@ public class CustomerDto {
     private String phone;
     private String intentionLevel;
     private String source;
-    private String islock;
+    private String status;
     private Integer pageNum = 1;
     private Integer pageSize = 10;
 }

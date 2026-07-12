@@ -32,13 +32,13 @@ public class CustomerServiceImpl extends
         String phone = dto.getPhone();
         String intentionLevel = dto.getIntentionLevel();
         String source = dto.getSource();
-        String islock = dto.getIslock();
+        String status = dto.getStatus();
 
         params.like(!StringUtils.isEmpty(name), "name", name);
         params.like(!StringUtils.isEmpty(phone), "phone", phone);
         params.eq(!StringUtils.isEmpty(intentionLevel), "intention_level", intentionLevel);
         params.eq(!StringUtils.isEmpty(source), "source", source);
-        params.eq(!StringUtils.isEmpty(islock), "islock", islock);
+        params.eq(!StringUtils.isEmpty(status), "status", status);
         params.orderByDesc("create_time");
 
         List<Customer> customers = customerMapper.selectList(page, params);

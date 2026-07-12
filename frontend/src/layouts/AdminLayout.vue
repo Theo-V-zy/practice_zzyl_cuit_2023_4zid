@@ -85,7 +85,6 @@
             </template>
           </el-menu>
         </el-scrollbar>
-        <p class="copyright">Copyright @ 2019-2020 Tencent.<br />All Rights Reserved</p>
       </aside>
 
       <main class="admin-content">

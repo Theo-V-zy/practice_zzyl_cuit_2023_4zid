@@ -28,6 +28,7 @@ DROP TABLE IF EXISTS `t_department`;
 DROP TABLE IF EXISTS `t_plain_item`;
 DROP TABLE IF EXISTS `t_nursing_plain`;
 DROP TABLE IF EXISTS `t_nursimg_item`;
+DROP TABLE IF EXISTS `t_nursing_level`;
 DROP TABLE IF EXISTS `t_menu`;
 DROP TABLE IF EXISTS `t_user`;
 
@@ -65,6 +66,21 @@ CREATE TABLE `t_menu` (
   PRIMARY KEY (`id`),
   KEY `idx_menu_pid` (`pid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+CREATE TABLE `t_nursing_level` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `level_name` varchar(100) DEFAULT NULL COMMENT '等级名称',
+  `islock` varchar(30) DEFAULT '启用' COMMENT '启用/禁用',
+  `description` varchar(500) DEFAULT NULL COMMENT '等级描述',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `t_nursing_level` (`level_name`, `islock`, `description`) VALUES
+('特级护理','启用','24小时专人照护，适用于完全失能老人'),
+('一级护理','启用','每日定时照护，适用于重度失能老人'),
+('二级护理','启用','定期巡视照护，适用于中度失能老人'),
+('三级护理','启用','基础生活照料，适用于轻度失能老人');
 
 CREATE TABLE `t_nursimg_item` (
   `id` int NOT NULL AUTO_INCREMENT,
