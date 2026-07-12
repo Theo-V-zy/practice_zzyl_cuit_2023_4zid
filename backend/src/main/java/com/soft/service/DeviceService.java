@@ -7,4 +7,5 @@ import java.util.Map;
 
 public interface DeviceService extends IService<Device> {
     Map<String, Object> queryDeviceList(DeviceDto dto);
+    String getMaxDeviceNo();
 }

@@ -20,6 +20,14 @@ public class DeviceServiceImpl extends ServiceImpl<DeviceMapper, Device> impleme
     private DeviceMapper deviceMapper;
 
     @Override
+    public String getMaxDeviceNo() {
+        QueryWrapper<Device> qw = new QueryWrapper<>();
+        qw.select("max(device_no) as deviceNo");
+        Device device = deviceMapper.selectOne(qw);
+        return device != null ? device.getDeviceNo() : null;
+    }
+
+    @Override
     public Map<String, Object> queryDeviceList(DeviceDto dto) {
         Page<Device> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         QueryWrapper<Device> params = new QueryWrapper<>();

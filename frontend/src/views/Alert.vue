@@ -4,10 +4,10 @@
   设备名称&nbsp;:&nbsp;
   <el-input style="width:15%;margin-right: 20px" v-model="condForm.deviceName" placeholder="设备名称"/>
   报警状态&nbsp;:&nbsp;
-  <el-select style="width:15%;margin-right: 20px" placeholder="请选择" v-model="condForm.alarmStatus">
+  <el-select style="width:15%;margin-right: 20px" placeholder="请选择" v-model="condForm.alertStatus">
     <el-option value="" label="全部" />
-    <el-option value="一般报警" label="一般报警" />
-    <el-option value="紧急报警" label="紧急报警" />
+    <el-option value="WARNING" label="一般报警" />
+    <el-option value="ALERT" label="紧急报警" />
   </el-select>
   <el-button type="primary" @click="loadAlertList">搜索</el-button>
   <el-button type="danger" @click="loadAlertList" plain>刷新报警</el-button>
@@ -29,8 +29,9 @@
     </el-table-column>
     <el-table-column label="报警状态" width="120">
       <template #default="scope">
-        <span v-if="scope.row.alarmStatus=='一般报警'" style="color:orange;font-weight:bold">⚠ 一般报警</span>
-        <span v-else style="color:red;font-weight:bold">🔴 紧急报警</span>
+        <span v-if="scope.row.alertStatus=='WARNING'" style="color:orange;font-weight:bold">⚠ 一般报警</span>
+        <span v-else-if="scope.row.alertStatus=='ALERT'" style="color:red;font-weight:bold">🔴 紧急报警</span>
+        <span v-else style="color:green">正常</span>
       </template>
     </el-table-column>
     <el-table-column prop="lastHeartbeat" label="最后心跳" width="160"/>
@@ -58,8 +59,8 @@
         <el-tag v-else type="danger">离线</el-tag>
       </el-descriptions-item>
       <el-descriptions-item label="报警状态" :span="2">
-        <span v-if="detailRow.alarmStatus=='无报警'" style="color:green">无报警</span>
-        <span v-else-if="detailRow.alarmStatus=='一般报警'" style="color:orange">一般报警</span>
+        <span v-if="detailRow.alertStatus=='NORMAL'" style="color:green">正常</span>
+        <span v-else-if="detailRow.alertStatus=='WARNING'" style="color:orange">一般报警</span>
         <span v-else style="color:red">紧急报警</span>
       </el-descriptions-item>
       <el-descriptions-item label="最后心跳">{{ detailRow.lastHeartbeat }}</el-descriptions-item>
@@ -74,21 +75,21 @@ import axios from "axios";
 import { ElMessage } from "element-plus";
 
 const condForm = reactive({
-  deviceName: '', alarmStatus: '', islock: '启用', pageNum: 1, pageSize: 10
+  deviceName: '', alertStatus: '', pageNum: 1, pageSize: 10
 });
 
 const alertList = ref([]);
 const total = ref(0);
 
 function loadAlertList() {
-  // Show only devices with alarm status
   axios.post("/devicePage", condForm)
     .then(response => {
-      // Filter only devices with alarm
-      const allDevices = response.data.devices || [];
-      alertList.value = allDevices.filter(d => d.alarmStatus && d.alarmStatus !== '无报警');
-      total.value = alertList.value.length;
-    }).catch(error => console.log(error));
+      alertList.value = response.data.data || [];
+      total.value = response.data.total;
+    }).catch(error => {
+      ElMessage({message: '加载报警数据失败', type: 'error'});
+      console.log(error);
+    });
 }
 
 onMounted(() => { loadAlertList(); });
@@ -99,15 +100,16 @@ function doAlertPage(pageNum) {
 }
 
 function handleAlert(row) {
-  // Mark alarm as handled - update device alarm status
   axios.post("/updateDevice", {
     id: row.id,
-    alarmStatus: '无报警',
-    runningStatus: row.runningStatus
+    alertStatus: 'NORMAL'
   }).then(response => {
     if (response.data.code == 200) loadAlertList();
-    ElMessage(response.data.msg || '报警已处理');
-  }).catch(error => console.log(error));
+    ElMessage({message: response.data.msg || '报警已处理', type: response.data.code == 200 ? 'success' : 'error'});
+  }).catch(error => {
+    ElMessage({message: '处理报警失败', type: 'error'});
+    console.log(error);
+  });
 }
 
 const detailVisible = ref(false);

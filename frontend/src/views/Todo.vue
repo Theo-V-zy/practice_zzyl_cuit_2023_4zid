@@ -16,7 +16,7 @@
       </el-form-item>
       <el-form-item style="margin-left: 30%">
         <el-button type="success" round @click="doApprove('APPROVED')">通过</el-button>
-        <el-button type="danger" round @click="doApprove('已拒绝')">拒绝</el-button>
+        <el-button type="danger" round @click="doApprove('REJECTED')">拒绝</el-button>
         <el-button type="warning" round @click="approveDialogVisible = false">取消</el-button>
       </el-form-item>
     </el-form>
@@ -74,10 +74,21 @@ import axios from "axios";
 import { ElMessage } from "element-plus";
 
 const approveDialogVisible = ref(false);
+const currentUser = reactive({ id: 1, realname: '' });
 const approveForm = reactive({
   id: '', applyType: '', elderName: '', description: '',
-  approveOpinion: '', approveUser: '马云', approveUserId: 1
+  approveOpinion: '', approveUserId: 1
 });
+
+function loadCurrentUser() {
+  axios.get("/loadInfo").then(r => {
+    if (r.data && r.data.id) {
+      currentUser.id = r.data.id;
+      currentUser.realname = r.data.realname;
+      approveForm.approveUserId = r.data.id;
+    }
+  }).catch(e => console.log(e));
+}
 
 function openApproveDialog(row) {
   approveForm.id = row.id;
@@ -124,7 +135,7 @@ function loadTodoList() {
     });
 }
 
-onMounted(() => { loadTodoList(); });
+onMounted(() => { loadCurrentUser(); loadTodoList(); });
 
 function doTodoPage(pageNum) {
   condForm.pageNum = pageNum;

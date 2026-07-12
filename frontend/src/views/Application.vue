@@ -10,7 +10,9 @@
         </el-select>
       </el-form-item>
       <el-form-item label="老人姓名">
-        <el-input v-model="form.elderName" placeholder="请输入老人姓名"/>
+        <el-select v-model="form.elderId" placeholder="请选择老人" style="width:100%" filterable>
+          <el-option v-for="e in elderList" :key="e.id" :value="e.id" :label="e.name" />
+        </el-select>
       </el-form-item>
       <el-form-item label="申请描述">
         <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请描述申请内容"/>
@@ -59,8 +61,8 @@
     <el-table-column prop="createTime" label="申请时间" width="160"/>
     <el-table-column label="状态" width="90">
       <template #default="scope">
-        <span v-if="scope.row.status=='待审批'" style="color:orange">待审批</span>
-        <span v-else-if="scope.row.status=='已通过'" style="color:green">已通过</span>
+        <span v-if="scope.row.status=='PENDING'" style="color:orange">待审批</span>
+        <span v-else-if="scope.row.status=='APPROVED'" style="color:green">已通过</span>
         <span v-else style="color:red">已拒绝</span>
       </template>
     </el-table-column>
@@ -79,14 +81,35 @@ import { ElMessage } from "element-plus";
 
 const dialogVisible = ref(false);
 
+const currentUser = reactive({ id: 1, realname: '' });
 const form = reactive({
-  applyType: '', elderName: '', description: '',
-  applyUser: '马云', applyUserId: 1
+  applyType: '', elderId: null, description: '',
+  applyUserId: 1
 });
 
+function loadCurrentUser() {
+  axios.get("/loadInfo").then(r => {
+    if (r.data && r.data.id) {
+      currentUser.id = r.data.id;
+      currentUser.realname = r.data.realname;
+      form.applyUserId = r.data.id;
+      condForm.applyUserId = r.data.id;
+    }
+  }).catch(e => console.log(e));
+}
+
+const elderList = ref([]);
+
 function openAddDialog() {
-  form.applyType = ''; form.elderName = ''; form.description = '';
+  form.applyType = ''; form.elderId = null; form.description = '';
+  loadElderList();
   dialogVisible.value = true;
+}
+
+function loadElderList() {
+  axios.get("/elderList").then(r => {
+    elderList.value = r.data.data || [];
+  }).catch(e => console.log(e));
 }
 
 function saveApply() {
@@ -104,7 +127,7 @@ function saveApply() {
 }
 
 const condForm = reactive({
-  applyType: '', status: '', elderName: '', applyUserId: 1, pageNum: 1, pageSize: 10
+  applyType: '', status: '', elderName: '', applyUserId: '', pageNum: 1, pageSize: 10
 });
 
 const applyList = ref([]);
@@ -121,7 +144,7 @@ function loadApplyList() {
     });
 }
 
-onMounted(() => { loadApplyList(); });
+onMounted(() => { loadCurrentUser(); loadApplyList(); });
 
 function doApplyPage(pageNum) {
   condForm.pageNum = pageNum;

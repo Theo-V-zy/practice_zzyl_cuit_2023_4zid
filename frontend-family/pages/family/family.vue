@@ -31,7 +31,7 @@ export default {
   data() { return { list: [] } },
   onShow() { this.loadData() },
   methods: {
-    async loadData() { try { const res = await familyElders(); this.list = res.data || [] } catch (e) {} },
+    async loadData() { try { const res = await familyElders(); this.list = res.data || [] } catch (e) { console.error(e) } },
     bedText(e) { return [e.building,e.floor,e.roomNo,e.bedNo].filter(Boolean).join(' ') || '暂未分配' },
     goBind() { uni.navigateTo({ url: '/pages/bind-family/bind-family' }) },
     goHealth(id) { uni.navigateTo({ url: `/pages/elder-detail/elder-detail?id=${id}` }) },
@@ -39,7 +39,7 @@ export default {
     confirmUnbind(elder) {
       uni.showModal({ title: '解绑家人', content: `确定解除与${elder.name}的绑定吗？`, success: async res => {
         if (!res.confirm) return
-        try { await unbindFamilyElder(elder.id); uni.showToast({ title: '解绑成功', icon: 'success' }); this.loadData() } catch (e) {}
+        try { await unbindFamilyElder(elder.id); uni.showToast({ title: '解绑成功', icon: 'success' }); this.loadData() } catch (e) { console.error(e) }
       } })
     }
   }

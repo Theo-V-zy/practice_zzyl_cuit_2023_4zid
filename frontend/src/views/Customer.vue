@@ -143,7 +143,10 @@ function loadCustomerList() {
     .then(response => {
       customerList.value = response.data.customers;
       total.value = response.data.total;
-    }).catch(error => console.log(error));
+    }).catch(error => {
+      ElMessage({message: '加载客户列表失败', type: 'error'});
+      console.log(error);
+    });
 }
 
 onMounted(() => { loadCustomerList(); });
@@ -181,7 +184,10 @@ function delCustomer(id) {
   axios.get("/deleteCustomer?id=" + id)
     .then(response => {
       if (response.data.code == 200) doCustomerPage(1);
-      ElMessage(response.data.msg);
-    }).catch(error => console.log(error));
+      ElMessage({message: response.data.msg, type: response.data.code == 200 ? 'success' : 'error'});
+    }).catch(error => {
+      ElMessage({message: '删除客户失败', type: 'error'});
+      console.log(error);
+    });
 }
 </script>
