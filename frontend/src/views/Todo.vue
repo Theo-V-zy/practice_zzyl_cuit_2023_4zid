@@ -45,9 +45,9 @@
       </template>
     </el-table-column>
     <el-table-column prop="elderName" label="老人姓名" width="100"/>
-    <el-table-column prop="applyUser" label="申请人" width="90"/>
-    <el-table-column prop="description" label="申请描述" min-width="180" show-overflow-tooltip/>
-    <el-table-column prop="applyTime" label="申请时间" width="160"/>
+    <el-table-column prop="applyUserName" label="申请人" width="90"/>
+    <el-table-column prop="reason" label="申请描述" min-width="180" show-overflow-tooltip/>
+    <el-table-column prop="createTime" label="申请时间" width="160"/>
     <el-table-column label="状态" width="90">
       <template #default="scope">
         <span v-if="scope.row.status=='PENDING'" style="color:orange;font-weight:bold">待审批</span>

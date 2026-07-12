@@ -34,6 +34,8 @@ public class Apply implements Serializable {
     private String elderName;
     @TableField(exist = false)
     private String applyUserName;
+    @TableField(exist = false)
+    private String approveUserName;
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

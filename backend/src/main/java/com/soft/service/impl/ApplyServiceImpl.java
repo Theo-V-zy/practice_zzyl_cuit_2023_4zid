@@ -36,6 +36,9 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, Apply> implements
             if (a.getApplyUserId() != null) {
                 try { a.setApplyUserName(jdbc.queryForObject("SELECT realname FROM t_user WHERE id=?", String.class, a.getApplyUserId())); } catch (Exception e) {}
             }
+            if (a.getApproveUserId() != null) {
+                try { a.setApproveUserName(jdbc.queryForObject("SELECT realname FROM t_user WHERE id=?", String.class, a.getApproveUserId())); } catch (Exception e) {}
+            }
         }
 
         Map<String, Object> result = new HashMap<>();
