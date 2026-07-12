@@ -48,6 +48,23 @@ npm run serve
 默认账号：`20260023`  
 默认密码：`222222`
 
+6. 家属端微信小程序：
+
+家属端是一个 uni-app 项目，位于 `frontend-family/`。
+
+```bash
+cd frontend-family
+npm install
+npm run build:mp-weixin
+```
+
+编译结果在 `frontend-family/dist/build/mp-weixin`。用**微信开发者工具**导入该目录即可预览。
+需在"详情 → 本地设置"中勾选"不校验合法域名"。
+
+家属端测试账号：`family001` / `123456`
+
+详细文档：[frontend-family/README.md](frontend-family/README.md)
+
 ## 推到 GitHub
 
 ```bash
