@@ -69,7 +69,7 @@ public class DeviceController {
 
         Device exist = deviceService.getById(device.getId());
         if (exist != null) {
-            exist.setIslock(device.getIslock());
+            exist.setStatus(device.getStatus());
             deviceService.updateById(exist);
             result.put("code", 200);
             result.put("msg", "操作成功");
