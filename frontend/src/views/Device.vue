@@ -41,10 +41,10 @@ function openAddDialog(){url="/saveDevice";cleanForm();dialogVisible.value=true}
 function cleanForm(){form.id='';form.deviceName='';form.deviceNo='';form.deviceType='';form.onlineStatus='ONLINE';form.alertStatus='NORMAL'}
 const condForm=reactive({deviceName:'',deviceType:'',onlineStatus:'',alertStatus:'',pageNum:1,pageSize:10})
 const deviceList=ref([]);const total=ref(0)
-function loadDeviceList(){axios.post("/devicePage",condForm).then(r=>{deviceList.value=r.data.data||[];total.value=r.data.total}).catch(e=>console.log(e))}
+function loadDeviceList(){axios.post("/devicePage",condForm).then(r=>{deviceList.value=r.data.data||[];total.value=r.data.total}).catch(e=>{ElMessage({message:'加载设备列表失败',type:'error'});console.log(e)})}
 onMounted(loadDeviceList)
 function doDevicePage(pn){condForm.pageNum=pn;loadDeviceList()}
-function saveDevice(){axios.post(url,form).then(r=>{if(r.data.code==200){dialogVisible.value=false;cleanForm();doDevicePage(1)};ElMessage(r.data.msg)}).catch(e=>console.log(e))}
+function saveDevice(){axios.post(url,form).then(r=>{if(r.data.code==200){dialogVisible.value=false;cleanForm();doDevicePage(1)};ElMessage({message:r.data.msg,type:r.data.code==200?'success':'error'})}).catch(e=>{ElMessage({message:'保存设备失败',type:'error'});console.log(e)})}
 function showDeviceInfo(row){form.id=row.id;form.deviceName=row.deviceName;form.deviceNo=row.deviceNo;form.deviceType=row.deviceType;form.onlineStatus=row.onlineStatus;form.alertStatus=row.alertStatus;dialogVisible.value=true;url="/updateDevice"}
-function delDevice(id){axios.get("/deleteDevice?id="+id).then(r=>{if(r.data.code==200)doDevicePage(1);ElMessage(r.data.msg)})}
+function delDevice(id){axios.get("/deleteDevice?id="+id).then(r=>{if(r.data.code==200)doDevicePage(1);ElMessage({message:r.data.msg,type:r.data.code==200?'success':'error'})}).catch(e=>{ElMessage({message:'删除设备失败',type:'error'});console.log(e)})}
 </script>

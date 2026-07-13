@@ -24,6 +24,14 @@ public class CustomerServiceImpl extends
     private CustomerMapper customerMapper;
 
     @Override
+    public String getMaxCustomerNo() {
+        QueryWrapper<Customer> qw = new QueryWrapper<>();
+        qw.select("max(customer_no) as customerNo");
+        Customer customer = customerMapper.selectOne(qw);
+        return customer != null ? customer.getCustomerNo() : null;
+    }
+
+    @Override
     public Map<String, Object> queryCustomerList(CustomerDto dto) {
         Page<Customer> page = new Page<>(dto.getPageNum(), dto.getPageSize());
         QueryWrapper<Customer> params = new QueryWrapper<>();

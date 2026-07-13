@@ -27,6 +27,19 @@ public class DeviceController {
         result.put("code", 400);
         result.put("msg", "添加设备失败");
 
+        // 自动生成设备编号
+        if (device.getDeviceNo() == null || device.getDeviceNo().isEmpty()) {
+            String maxNo = deviceService.getMaxDeviceNo();
+            String nextNo;
+            if (maxNo == null) {
+                nextNo = "DEV001";
+            } else {
+                int num = Integer.parseInt(maxNo.substring(3)) + 1;
+                nextNo = "DEV" + String.format("%03d", num);
+            }
+            device.setDeviceNo(nextNo);
+        }
+
         device.setCreateTime(new Date());
         deviceService.save(device);
 

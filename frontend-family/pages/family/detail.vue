@@ -56,16 +56,14 @@
 </template>
 
 <script>
-import { request } from '../../api/request.js';
+import { familyElderDetail, unbindFamilyElder } from '../../api/request.js';
 
 export default {
   data() {
     return {
       elderId: '',
       elderName: '',
-      elder: {},
-      familyUserId: 1,
-      bindId: ''
+      elder: {}
     };
   },
   onLoad(options) {
@@ -75,14 +73,8 @@ export default {
   },
   methods: {
     loadElderInfo() {
-      request({
-        url: '/family/elderHealthInfo',
-        method: 'GET',
-        data: { elderId: this.elderId }
-      }).then(res => {
-        if (res.code === 200) {
-          this.elder = res.data || {};
-        }
+      familyElderDetail(this.elderId).then(res => {
+        this.elder = res.data || {};
       }).catch(err => {
         console.error('加载老人信息失败', err);
       });
@@ -96,19 +88,11 @@ export default {
         content: '解绑后将无法查看老人的信息，确定要解绑吗？',
         success: (res) => {
           if (res.confirm) {
-            request({
-              url: '/family/unbindElder',
-              method: 'GET',
-              data: { id: this.bindId || 1 }
-            }).then(result => {
-              if (result.code === 200) {
-                uni.showToast({ title: '解绑成功', icon: 'success' });
-                setTimeout(() => { uni.navigateBack(); }, 1500);
-              } else {
-                uni.showToast({ title: result.msg, icon: 'none' });
-              }
+            unbindFamilyElder(this.elderId).then(() => {
+              uni.showToast({ title: '解绑成功', icon: 'success' });
+              setTimeout(() => { uni.navigateBack(); }, 1500);
             }).catch(err => {
-              uni.showToast({ title: '解绑失败', icon: 'none' });
+              // 错误已在 request.js 全局处理
             });
           }
         }

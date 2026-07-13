@@ -20,11 +20,25 @@ public class ApplyServiceImpl extends ServiceImpl<ApplyMapper, Apply> implements
     private JdbcTemplate jdbc;
 
     @Override
-    public Map<String, Object> queryApplyPage(Integer pageNum, Integer pageSize, String applyType, String status) {
+    public Map<String, Object> queryApplyPage(Integer pageNum, Integer pageSize, String applyType, String status, String elderName, Integer applyUserId) {
         Page<Apply> page = new Page<>(pageNum != null ? pageNum : 1, pageSize != null ? pageSize : 10);
         QueryWrapper<Apply> params = new QueryWrapper<>();
         params.eq(StringUtils.hasText(applyType), "apply_type", applyType);
         params.eq(StringUtils.hasText(status), "status", status);
+        params.eq(applyUserId != null, "apply_user_id", applyUserId);
+        // 老人姓名搜索：先按姓名查elder_id列表，再过滤
+        if (StringUtils.hasText(elderName)) {
+            List<Integer> elderIds = jdbc.queryForList(
+                "SELECT id FROM t_elder WHERE name LIKE ?", Integer.class, "%" + elderName + "%");
+            if (elderIds.isEmpty()) {
+                Map<String, Object> empty = new HashMap<>();
+                empty.put("code", 200);
+                empty.put("data", Collections.emptyList());
+                empty.put("total", 0L);
+                return empty;
+            }
+            params.in("elder_id", elderIds);
+        }
         params.orderByDesc("create_time");
         page = this.page(page, params);
 

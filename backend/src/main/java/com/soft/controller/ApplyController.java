@@ -21,11 +21,24 @@ public class ApplyController {
 
     @RequestMapping("/applies/page")
     public Map<String, Object> page(@RequestBody Map<String, Object> params) {
-        Integer pageNum = (Integer) params.getOrDefault("pageNum", 1);
-        Integer pageSize = (Integer) params.getOrDefault("pageSize", 10);
-        String applyType = (String) params.getOrDefault("applyType", null);
-        String status = (String) params.getOrDefault("status", null);
-        return applyService.queryApplyPage(pageNum, pageSize, applyType, status);
+        Integer pageNum = toInt(params.get("pageNum"), 1);
+        Integer pageSize = toInt(params.get("pageSize"), 10);
+        String applyType = toString(params.get("applyType"));
+        String status = toString(params.get("status"));
+        String elderName = toString(params.get("elderName"));
+        Integer applyUserId = toInt(params.get("applyUserId"), null);
+        return applyService.queryApplyPage(pageNum, pageSize, applyType, status, elderName, applyUserId);
+    }
+
+    private Integer toInt(Object val, Integer defaultVal) {
+        if (val == null || "".equals(val)) return defaultVal;
+        return Integer.valueOf(String.valueOf(val));
+    }
+
+    private String toString(Object val) {
+        if (val == null || "".equals(val)) return null;
+        String s = String.valueOf(val).trim();
+        return s.isEmpty() ? null : s;
     }
 
     @PostMapping("/applies")
