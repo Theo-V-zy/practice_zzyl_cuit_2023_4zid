@@ -78,7 +78,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getRolePage, addRole, updateRole, deleteRole, updateRoleMenus, updateRoleDataScope, getMenuTree } from '@/api/admin'
 
@@ -116,10 +116,12 @@ function selectRole(r){
   dataScope.value=r.dataScope||'ALL'
   activeTab.value='menu'
   editMode.value=false
-  // check-strictly 模式下每个节点独立勾选
-  if(menuTreeRef.value){
-    menuTreeRef.value.setCheckedKeys(ids)
-  }
+  // check-strictly 模式下每个节点独立勾选，需等树渲染完成
+  nextTick(() => {
+    if(menuTreeRef.value){
+      menuTreeRef.value.setCheckedKeys(ids)
+    }
+  })
 }
 
 function handleAdd(){
