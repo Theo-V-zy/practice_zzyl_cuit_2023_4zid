@@ -499,7 +499,7 @@ CREATE TABLE `t_plain_item` (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `t_plain_item` VALUES (1,2,3,'康复运行','2026-07-09T07:12:15.000Z','天',2),(2,2,4,'康复运行','2026-07-09T07:19:12.000Z','天',1),(3,3,4,'助餐','2026-07-09T07:19:12.000Z','周',2),(4,4,4,'理发','2026-07-09T07:19:12.000Z','月',3);
+INSERT INTO `t_plain_item` VALUES (1,2,3,'助浴','2026-07-09T07:12:15.000Z','天',2),(2,2,4,'助浴','2026-07-09T07:19:12.000Z','天',1),(3,3,4,'肩颈按摩60分钟','2026-07-09T07:19:12.000Z','周',2),(4,4,4,'健康检查','2026-07-09T07:19:12.000Z','月',3);
 
 --
 -- Table structure for table `t_post`
