@@ -224,6 +224,8 @@ function loadMenus() {
             ...item,
             subItems: (item.subItems || []).sort((a, b) => (a.sort || 0) - (b.sort || 0))
           }))
+          // 过滤掉没有子菜单且自身没有路径的空父节点，避免顶栏点击后侧边栏为空
+          .filter((item) => item.path || (item.subItems && item.subItems.length > 0))
       }
       syncModuleWithRoute(route.path)
     })
