@@ -76,7 +76,7 @@
         v-model:current-page="queryForm.page" v-model:page-size="queryForm.pageSize"
         :page-sizes="[10, 20, 30, 40]" :total="total"
         layout="total, sizes, prev, pager, next"
-        @size-change="handleQuery" @current-change="handleQuery"
+        @size-change="handleQuery" @current-change="loadData"
       />
     </div>
 
