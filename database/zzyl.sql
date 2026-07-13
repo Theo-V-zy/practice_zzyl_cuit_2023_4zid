@@ -367,13 +367,12 @@ CREATE TABLE `t_nursimg_item` (
   `unit` varchar(255) DEFAULT NULL,
   `sort` varchar(255) DEFAULT NULL,
   `islock` varchar(255) DEFAULT NULL,
-  `image` varchar(255) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `t_nursimg_item` VALUES (2,'助浴',15.00,'次','1','0','https://zzyl-706.oss-cn-chengdu.aliyuncs.com/df28271b-306b-4627-b5f1-672ad4c27689.png','由护理人员协助长者沐浴，做好防滑与保暖照护。'),(3,'肩颈按摩60分钟',98.90,'小时','2','0','https://zzyl-706.oss-cn-chengdu.aliyuncs.com/df28271b-306b-4627-b5f1-672ad4c27689.png','舒缓肩颈疲劳，服务前确认长者身体情况。'),(4,'按摩',80.00,'小时','3','0','https://zzyl-706.oss-cn-chengdu.aliyuncs.com/df28271b-306b-4627-b5f1-672ad4c27689.png','专业护理人员提供舒缓按摩服务。');
+INSERT INTO `t_nursimg_item` VALUES (2,'助浴',15.00,'日','1','0','由护理人员协助长者沐浴，做好防滑与保暖照护。'),(3,'肩颈按摩60分钟',98.90,'日','2','0','舒缓肩颈疲劳，服务前确认长者身体情况。'),(4,'健康检查',80.00,'月','3','0','定期为长者进行身体健康检查与评估。');
 
 --
 -- Table structure for table `t_nursing_level`
@@ -413,7 +412,7 @@ CREATE TABLE `t_nursing_plain` (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `t_nursing_plain` VALUES (1,'A级护理计划','2026-07-09 15:12:55','马云','启动'),(2,'B级护理计划','2026-07-09 15:15:59','马云','启动'),(3,'B级护理计划','2026-07-09 15:18:19','马云','启动'),(4,'D护理计划','2026-07-09 15:19:57','马云','启动');
+INSERT INTO `t_nursing_plain` VALUES (1,'A级护理计划',1,'A级','2026-07-09 15:12:55','马云','启动'),(2,'B级护理计划',2,'B级','2026-07-09 15:15:59','马云','启动'),(3,'B级护理计划',2,'B级','2026-07-09 15:18:19','马云','启动'),(4,'D护理计划',4,'D级','2026-07-09 15:19:57','马云','启动');
 
 --
 -- Table structure for table `t_nursing_task`
@@ -495,7 +494,7 @@ CREATE TABLE `t_plain_item` (
   PRIMARY KEY (`id`),
   KEY `idx_plain_item_item_id` (`item_id`),
   KEY `idx_plain_item_plain_id` (`plain_id`),
-  CONSTRAINT `fk_plain_item_item` FOREIGN KEY (`item_id`) REFERENCES `t_nursimg_item` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_plain_item_item` FOREIGN KEY (`item_id`) REFERENCES `t_nursimg_item` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
   CONSTRAINT `fk_plain_item_plain` FOREIGN KEY (`plain_id`) REFERENCES `t_nursing_plain` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;

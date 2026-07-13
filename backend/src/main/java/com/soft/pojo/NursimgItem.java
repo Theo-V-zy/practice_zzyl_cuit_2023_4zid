@@ -47,12 +47,7 @@ public class NursimgItem implements Serializable {
     private String islock;
 
     /**
-     * 
-     */
-    private String image;
-
-    /**
-     * 
+     *
      */
     private String description;
 

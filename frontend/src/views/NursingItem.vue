@@ -27,18 +27,6 @@
             <el-radio value="启用">启用</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="照片">
-          <!-- action后台处理文件上传请求的url接口地址 -->
-          <el-upload
-              class="avatar-uploader"
-              :action="uploadUrl"
-              :show-file-list="false"
-              name="mf"
-              :on-success="handleNursingPhotoSuccess">
-            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
-            <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-          </el-upload>
-        </el-form-item>
         <el-form-item label="护理项目描述">
           <el-input v-model="nursingItemForm.description" type="textarea" />
         </el-form-item>
@@ -72,11 +60,6 @@
       <el-table-column prop="itemname" label="名称"/>
       <el-table-column prop="price" label="价格"  width="100"/>
       <el-table-column prop="unit" label="频率"  width="100"/>
-      <el-table-column  label="图片">
-        <template #default="scope">
-          <img :src="scope.row.image" width="35px" height="35px"/>
-        </template>
-      </el-table-column>
       <el-table-column  label="状态">
         <template #default="scope" width="100">
           <span v-if="scope.row.islock=='启用'" style="color:dodgerblue">
@@ -115,7 +98,6 @@
 import {onMounted, reactive, ref} from "vue";
 import axios from "axios";
 import {ElMessage} from "element-plus";
-  const uploadUrl=axios.defaults.baseURL + "/upload";
   //声明对话框状态
   const nursingItemDialogVisible=ref(false);
   //声明护理项目表单对象
@@ -125,7 +107,6 @@ import {ElMessage} from "element-plus";
     price:'',
     unit:'',
     islock:'',
-    image:'',
     description:''
   });
   //声明变量保存处理添加和更新请求的url接口
@@ -135,13 +116,6 @@ import {ElMessage} from "element-plus";
     //当打开信息护理项目信息对话框的时候
     url="/saveNursingItme";
     nursingItemDialogVisible.value=true;
-  }
-  //声明图片回显的url
-  const imageUrl=ref(null);
-  //定义函发送图片上传请求，处理图片上传后的回显
-  function handleNursingPhotoSuccess(path){
-    imageUrl.value=path;
-    nursingItemForm.image=path;
   }
   //定义函数发生请求，保存护理项信息
   function saveNursingItem(){
@@ -166,7 +140,6 @@ import {ElMessage} from "element-plus";
     nursingItemForm.itemname="";
     nursingItemForm.price="";
     nursingItemForm.unit="";
-    nursingItemForm.image="";
     nursingItemForm.description="";
     nursingItemForm.islock="";
 
@@ -210,12 +183,10 @@ import {ElMessage} from "element-plus";
     nursingItemForm.itemname=row.itemname;
     nursingItemForm.price=row.price;
     nursingItemForm.unit=row.unit;
-    nursingItemForm.image=row.image;
     nursingItemForm.description=row.description;
     nursingItemForm.islock=row.islock;
     //打开对话框
     nursingItemDialogVisible.value=true;
-    imageUrl.value=row.image;
     //当打开护理信息回显对话框
     url="/updateNursingItme";
 

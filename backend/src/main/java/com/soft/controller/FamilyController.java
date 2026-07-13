@@ -150,7 +150,7 @@ public class FamilyController {
                                              @PathVariable Integer serviceId) {
         requireFamilyId(token);
         return data(jdbcTemplate.queryForMap(
-                "SELECT id, itemname AS name, price, unit, image, description FROM t_nursimg_item WHERE id=?", serviceId));
+                "SELECT id, itemname AS name, price, unit, description FROM t_nursimg_item WHERE id=?", serviceId));
     }
 
     @PostMapping("/orders")
@@ -182,8 +182,7 @@ public class FamilyController {
                 "SELECT o.id,o.order_no AS orderNo,o.service_item_id AS serviceId,o.service_name AS serviceName," +
                         "o.total_amount AS totalAmount,o.pay_amount AS payAmount,o.pay_status AS payStatus," +
                         "o.order_status AS orderStatus,o.service_time AS serviceTime,o.create_time AS createTime," +
-                        "n.image,e.name AS elderName FROM t_order o LEFT JOIN t_elder e ON o.elder_id=e.id " +
-                        "LEFT JOIN t_nursimg_item n ON o.service_item_id=n.id " +
+                        "e.name AS elderName FROM t_order o LEFT JOIN t_elder e ON o.elder_id=e.id " +
                         "WHERE o.family_id=? OR o.elder_id IN (SELECT elder_id FROM t_family_elder WHERE family_id=? AND status=1) " +
                         "ORDER BY o.create_time DESC", familyId, familyId);
         return page(list);
@@ -197,8 +196,8 @@ public class FamilyController {
                 "SELECT o.id,o.order_no AS orderNo,o.service_name AS serviceName,o.total_amount AS totalAmount," +
                         "o.pay_amount AS payAmount,o.pay_status AS payStatus,o.order_status AS orderStatus,o.quantity," +
                         "o.create_time AS createTime,o.service_time AS serviceTime,o.remark,o.refund_reason AS refundReason," +
-                        "o.refund_amount AS refundAmount,n.image,e.name AS elderName FROM t_order o " +
-                        "LEFT JOIN t_elder e ON o.elder_id=e.id LEFT JOIN t_nursimg_item n ON o.service_item_id=n.id " +
+                        "o.refund_amount AS refundAmount,e.name AS elderName FROM t_order o " +
+                        "LEFT JOIN t_elder e ON o.elder_id=e.id " +
                         "WHERE o.id=? AND (o.family_id=? OR o.elder_id IN " +
                         "(SELECT elder_id FROM t_family_elder WHERE family_id=? AND status=1))", id, familyId, familyId);
         if (list.isEmpty()) {

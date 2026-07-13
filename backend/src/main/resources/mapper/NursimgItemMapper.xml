@@ -11,13 +11,12 @@
             <result property="unit" column="unit" jdbcType="VARCHAR"/>
             <result property="sort" column="sort" jdbcType="VARCHAR"/>
             <result property="islock" column="islock" jdbcType="VARCHAR"/>
-            <result property="image" column="image" jdbcType="VARCHAR"/>
             <result property="description" column="description" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,itemname,price,
         unit,sort,islock,
-        image,description
+        description
     </sql>
 </mapper>
