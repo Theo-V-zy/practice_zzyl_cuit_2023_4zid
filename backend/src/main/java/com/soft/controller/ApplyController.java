@@ -2,6 +2,7 @@ package com.soft.controller;
 
 import com.soft.pojo.Apply;
 import com.soft.service.ApplyService;
+import com.soft.service.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,6 +62,10 @@ public class ApplyController {
         apply.setCreateTime(LocalDateTime.now());
 
         boolean ok = applyService.save(apply);
+        if (ok) {
+            String typeName = apply.getApplyType().equals("CHECKIN") ? "入住" : apply.getApplyType().equals("CHECKOUT") ? "退住" : "请假";
+            MessageUtil.send("【待办事项】新的" + typeName + "申请", "用户提交了" + typeName + "申请，请尽快审批。", "业务提醒", "APPLY");
+        }
         result.put("code", ok ? 200 : 400);
         result.put("msg", ok ? "新增成功" : "新增失败");
         return result;
@@ -107,6 +112,9 @@ public class ApplyController {
 
             result.put("code", 200);
             result.put("msg", "审批成功");
+            String typeName = db.getApplyType().equals("CHECKIN") ? "入住" : db.getApplyType().equals("CHECKOUT") ? "退住" : "请假";
+            String resultName = "APPROVED".equals(db.getStatus()) ? "通过" : "驳回";
+            MessageUtil.send("【审批通知】" + typeName + "申请已" + resultName, "您的" + typeName + "申请已被" + resultName + "。", "业务提醒", "APPLY");
         }
         return result;
     }

@@ -3,6 +3,7 @@ package com.soft.controller;
 import com.soft.dto.VisitDto;
 import com.soft.pojo.Visit;
 import com.soft.service.VisitService;
+import com.soft.service.MessageUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,6 +53,7 @@ public class VisitController {
         visit.setCreateTime(LocalDateTime.now());
 
         boolean ok = visitService.save(visit);
+        if (ok) MessageUtil.send("【预约通知】新的来访预约", visit.getVisitorName() + "预约了来访参观，请做好准备。", "业务提醒", "VISIT");
         result.put("code", ok ? 200 : 400);
         result.put("msg", ok ? "新增成功" : "新增失败");
         return result;
