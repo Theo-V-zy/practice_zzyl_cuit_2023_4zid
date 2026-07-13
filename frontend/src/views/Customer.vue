@@ -103,7 +103,7 @@
     </el-table-column>
   </el-table>
 
-  <el-pagination size="small" background layout="prev, pager, next" :total="total" @change="doCustomerPage"/>
+  <el-pagination size="small" background layout="prev, pager, next" :total="total" @current-change="doCustomerPage"/>
 </template>
 
 <script setup>

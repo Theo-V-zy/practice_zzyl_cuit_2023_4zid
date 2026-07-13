@@ -43,7 +43,7 @@
     </el-table-column>
   </el-table>
 
-  <el-pagination size="small" background layout="prev, pager, next" :total="total" @change="doAlertPage"/>
+  <el-pagination size="small" background layout="prev, pager, next" :total="total" @current-change="doAlertPage"/>
 
   <!-- 详情对话框 -->
   <el-dialog v-model="detailVisible" title="设备详情" width="40%">

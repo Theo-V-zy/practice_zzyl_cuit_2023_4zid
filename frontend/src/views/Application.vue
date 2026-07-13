@@ -71,7 +71,7 @@
     <el-table-column prop="approveTime" label="审批时间" width="160"/>
   </el-table>
 
-  <el-pagination size="small" background layout="prev, pager, next" :total="total" @change="doApplyPage"/>
+  <el-pagination size="small" background layout="prev, pager, next" :total="total" @current-change="doApplyPage"/>
 </template>
 
 <script setup>

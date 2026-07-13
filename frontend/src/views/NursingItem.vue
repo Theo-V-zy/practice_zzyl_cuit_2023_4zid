@@ -107,7 +107,7 @@
         size="small"
         background
         layout="prev, pager, next"
-        :total="total" @change="doNusringItemPage"/>
+        :total="total" @current-change="doNusringItemPage"/>
 </template>
 
 <script setup>

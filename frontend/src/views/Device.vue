@@ -30,7 +30,7 @@
       <el-button type="warning" size="small" @click="delDevice(scope.row.id)">删除</el-button>
     </template></el-table-column>
   </el-table>
-  <el-pagination size="small" background layout="prev,pager,next" :total="total" @change="doDevicePage"/>
+  <el-pagination size="small" background layout="prev,pager,next" :total="total" @current-change="doDevicePage"/>
 </template>
 
 <script setup>

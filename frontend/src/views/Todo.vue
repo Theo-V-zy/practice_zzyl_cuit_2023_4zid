@@ -65,7 +65,7 @@
     </el-table-column>
   </el-table>
 
-  <el-pagination size="small" background layout="prev, pager, next" :total="total" @change="doTodoPage"/>
+  <el-pagination size="small" background layout="prev, pager, next" :total="total" @current-change="doTodoPage"/>
 </template>
 
 <script setup>
