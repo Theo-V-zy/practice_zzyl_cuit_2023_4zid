@@ -45,6 +45,7 @@
                 show-checkbox
                 node-key="id"
                 default-expand-all
+                check-strictly
                 :props="{ label:'mname', children:'subItems', disabled:()=>!editMode }"
               />
             </div>
@@ -115,10 +116,9 @@ function selectRole(r){
   dataScope.value=r.dataScope||'ALL'
   activeTab.value='menu'
   editMode.value=false
-  // 用 setCheckedKeys 强制更新勾选，default-checked-keys 不可靠
+  // check-strictly 模式下每个节点独立勾选
   if(menuTreeRef.value){
-    menuTreeRef.value.setCheckedKeys([])
-    setTimeout(()=>menuTreeRef.value.setCheckedKeys(ids), 50)
+    menuTreeRef.value.setCheckedKeys(ids)
   }
 }
 
@@ -154,30 +154,26 @@ function handleToggle(r){
     updateRole({id:r.id,status:1}).then(()=>{ElMessage.success('启用成功');loadData()})
   }
 }
-// 递归收集团队某节点及其所有子孙的ID
-function collectAllIds(node) {
-  const ids = [node.id]
-  ;(node.subItems || []).forEach(c => { ids.push(...collectAllIds(c)) })
-  return ids
-}
-// 在树中按ID查找节点
-function findInTree(id, nodes) {
+// 收集某节点的所有祖先ID（往上找爹，不找子孙）
+function collectAncestorIds(id, nodes, parents) {
   for (const n of nodes) {
-    if (n.id === id) return n
-    const r = findInTree(id, n.subItems || [])
-    if (r) return r
+    if (n.id === id) { parents.push(id); return true }
+    if (n.subItems && collectAncestorIds(id, n.subItems, parents)) {
+      parents.push(n.id)
+      return true
+    }
   }
-  return null
+  return false
 }
 async function saveMenus(){
   if(!selectedRole.value)return
   const checked = menuTreeRef.value.getCheckedKeys()
-  const half = menuTreeRef.value.getHalfCheckedKeys()
-  const allIds = new Set([...checked, ...half])
-  // 双向联动：每个勾选节点的所有子孙全带上
-  for (const id of [...allIds]) {
-    const node = findInTree(id, menuTree.value)
-    if (node) collectAllIds(node).forEach(i => allIds.add(i))
+  const allIds = new Set(checked)
+  // 只补祖先：勾子菜单时自动补父节点，方便导航；不自动补子孙
+  for (const id of checked) {
+    const parents = []
+    collectAncestorIds(id, menuTree.value, parents)
+    parents.forEach(i => allIds.add(i))
   }
   await updateRoleMenus(selectedRole.value.id, [...allIds].join(','))
   ElMessage.success('菜单权限保存成功')

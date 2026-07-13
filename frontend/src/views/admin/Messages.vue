@@ -166,11 +166,13 @@ async function handleMarkRead(row) {
 }
 
 async function handleBatchRead() {
-  // 标记当前页所有未读消息为已读
-  const unreadIds = tableData.value.filter(m => m.readStatus === 0).map(m => m.id)
-  if (unreadIds.length === 0) { ElMessage.warning('当前没有未读消息'); return }
-  await readMessageBatch(unreadIds)
-  ElMessage.success('批量已读成功')
+  const ids = selectedIds.value.length > 0
+    ? selectedIds.value.filter(id => tableData.value.find(m => m.id === id && m.readStatus === 0))
+    : tableData.value.filter(m => m.readStatus === 0).map(m => m.id)
+  if (ids.length === 0) { ElMessage.warning('没有需要标记的消息'); return }
+  await readMessageBatch(ids)
+  ElMessage.success(`已标记 ${ids.length} 条消息为已读`)
+  selectedIds.value = []
   loadData()
 }
 
@@ -181,12 +183,13 @@ function handleDelete(row) {
 }
 
 function handleDeleteAll() {
-  ElMessageBox.confirm('确定删除全部消息吗？此操作不可恢复。', '警告', { type: 'warning', confirmButtonText: '全部删除' })
+  const ids = selectedIds.value.length > 0 ? selectedIds.value : tableData.value.map(m => m.id)
+  const label = selectedIds.value.length > 0 ? `删除选中的 ${ids.length} 条消息` : '删除当前页全部消息'
+  ElMessageBox.confirm(`确定${label}吗？此操作不可恢复。`, '警告', { type: 'warning', confirmButtonText: '确认删除' })
     .then(async () => {
-      for (const row of tableData.value) {
-        await deleteMessage(row.id)
-      }
-      ElMessage.success('已删除当前页消息')
+      for (const id of ids) { await deleteMessage(id) }
+      ElMessage.success(`已删除 ${ids.length} 条消息`)
+      selectedIds.value = []
       loadData()
     })
     .catch(() => {})
