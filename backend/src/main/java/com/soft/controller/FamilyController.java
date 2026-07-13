@@ -139,18 +139,64 @@ public class FamilyController {
     public Map<String, Object> services(@RequestHeader(value = "X-Family-Token", required = false) String token,
                                         @RequestParam(required = false, defaultValue = "") String keyword) {
         requireFamilyId(token);
-        String sql = "SELECT id, itemname AS name, price, unit, image, description " +
-                "FROM t_nursimg_item WHERE (islock IS NULL OR islock IN ('启用','0','1')) " +
-                "AND (?='' OR itemname LIKE CONCAT('%',?,'%')) ORDER BY CAST(sort AS UNSIGNED), id";
-        return data(jdbcTemplate.queryForList(sql, keyword, keyword));
+        String sql = "SELECT id, name, price, unit, description, type FROM (" +
+                "SELECT id, itemname AS name, price, unit, description, 'item' AS type, CAST(sort AS UNSIGNED) AS ord " +
+                "FROM t_nursimg_item WHERE price > 0 AND (islock IS NULL OR islock IN ('启用','0','1')) " +
+                "AND (?='' OR itemname LIKE CONCAT('%',?,'%')) " +
+                "UNION ALL " +
+                "SELECT -p.id AS id, p.plainname AS name, " +
+                "COALESCE((SELECT SUM(CASE WHEN ni.unit='周' THEN ni.price*pi.hlpc/7 " +
+                "WHEN ni.unit='月' THEN ni.price*pi.hlpc/30 ELSE ni.price*pi.hlpc END) " +
+                "FROM t_plain_item pi JOIN t_nursimg_item ni ON pi.item_id=ni.id " +
+                "WHERE pi.plain_id=p.id AND (ni.islock IS NULL OR ni.islock='启用')), 0) AS price, " +
+                "'日' AS unit, " +
+                "CONCAT('已选', COALESCE((SELECT COUNT(*) FROM t_plain_item pi WHERE pi.plain_id=p.id), 0), '项 | ', " +
+                "COALESCE((SELECT GROUP_CONCAT(pi.itemname SEPARATOR '、') FROM t_plain_item pi WHERE pi.plain_id=p.id), '')) AS description, " +
+                "'plan' AS type, 999 AS ord " +
+                "FROM t_nursing_plain p WHERE p.islock='启动' AND EXISTS " +
+                "(SELECT 1 FROM t_plain_item pi WHERE pi.plain_id=p.id) " +
+                "AND (?='' OR p.plainname LIKE CONCAT('%',?,'%')) " +
+                ") t WHERE price > 0 ORDER BY ord, id";
+        return data(jdbcTemplate.queryForList(sql, keyword, keyword, keyword, keyword));
     }
 
     @GetMapping("/services/{serviceId}")
     public Map<String, Object> serviceDetail(@RequestHeader(value = "X-Family-Token", required = false) String token,
                                              @PathVariable Integer serviceId) {
         requireFamilyId(token);
-        return data(jdbcTemplate.queryForMap(
-                "SELECT id, itemname AS name, price, unit, description FROM t_nursimg_item WHERE id=?", serviceId));
+        // 负数ID表示护理计划
+        if (serviceId < 0) {
+            int planId = -serviceId;
+            List<Map<String, Object>> plans = jdbcTemplate.queryForList(
+                    "SELECT -p.id AS id, p.plainname AS name, " +
+                    "COALESCE((SELECT SUM(CASE WHEN ni.unit='周' THEN ni.price*pi.hlpc/7 " +
+                    "WHEN ni.unit='月' THEN ni.price*pi.hlpc/30 ELSE ni.price*pi.hlpc END) " +
+                    "FROM t_plain_item pi JOIN t_nursimg_item ni ON pi.item_id=ni.id " +
+                    "WHERE pi.plain_id=p.id AND (ni.islock IS NULL OR ni.islock='启用')), 0) AS price, " +
+                    "'日' AS unit, p.level_name AS levelName, " +
+                    "COALESCE((SELECT GROUP_CONCAT(pi.itemname SEPARATOR '、') FROM t_plain_item pi " +
+                    "WHERE pi.plain_id=p.id), '') AS description, 'plan' AS type " +
+                    "FROM t_nursing_plain p WHERE p.id=? AND p.islock='启动'",
+                    planId);
+            if (!plans.isEmpty()) {
+                Map<String, Object> plan = plans.get(0);
+                plan.put("items", jdbcTemplate.queryForList(
+                        "SELECT pi.id, pi.item_id AS itemId, pi.itemname, pi.hlzq AS unit, pi.hlpc, ni.price, " +
+                        "ni.description FROM t_plain_item pi " +
+                        "JOIN t_nursimg_item ni ON pi.item_id=ni.id WHERE pi.plain_id=?",
+                        planId));
+                return data(plan);
+            }
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "套餐不存在");
+        }
+        // 正数ID为护理项目
+        List<Map<String, Object>> items = jdbcTemplate.queryForList(
+                "SELECT id, itemname AS name, price, unit, description, 'item' AS type FROM t_nursimg_item WHERE id=?",
+                serviceId);
+        if (!items.isEmpty()) {
+            return data(items.get(0));
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "服务不存在");
     }
 
     @PostMapping("/orders")
@@ -160,6 +206,39 @@ public class FamilyController {
         Integer elderId = integer(body.get("elderId"));
         Integer serviceId = integer(body.get("serviceId"));
         ensureElderOwned(familyId, elderId);
+        // 套餐下单：合并为一个订单
+        if (serviceId < 0) {
+            int planId = -serviceId;
+            List<Map<String, Object>> items = jdbcTemplate.queryForList(
+                    "SELECT pi.itemname, ni.price, ni.unit FROM t_plain_item pi " +
+                    "JOIN t_nursimg_item ni ON pi.item_id=ni.id WHERE pi.plain_id=?", planId);
+            if (items.isEmpty()) {
+                return failure("套餐内没有可用项目");
+            }
+            // 计算日总价
+            BigDecimal total = BigDecimal.ZERO;
+            StringBuilder itemList = new StringBuilder();
+            for (Map<String, Object> item : items) {
+                BigDecimal price = (BigDecimal) item.get("price");
+                total = total.add(price);
+                if (itemList.length() > 0) itemList.append("、");
+                itemList.append(item.get("itemname"));
+            }
+            // 查计划名称
+            String planName = jdbcTemplate.queryForObject(
+                    "SELECT plainname FROM t_nursing_plain WHERE id=?", String.class, planId);
+            String orderNo = number("DD");
+            jdbcTemplate.update("INSERT INTO t_order(order_no,family_id,elder_id,service_item_id,service_name," +
+                    "quantity,total_amount,pay_amount,pay_status,order_status,service_time,remark) " +
+                    "VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+                    orderNo, familyId, elderId, 0, planName, 1,
+                    total, BigDecimal.ZERO, "UNPAID", "CREATED",
+                    nullableText(body.get("serviceTime")), "套餐包含：" + itemList.toString());
+            Integer orderId = jdbcTemplate.queryForObject(
+                    "SELECT id FROM t_order WHERE order_no=?", Integer.class, orderNo);
+            return data(Map.of("id", orderId, "orderNo", orderNo, "planName", planName, "itemCount", items.size()));
+        }
+        // 单项下单
         Map<String, Object> service = jdbcTemplate.queryForMap(
                 "SELECT itemname, price FROM t_nursimg_item WHERE id=?", serviceId);
         int quantity = Math.max(1, integer(body.getOrDefault("quantity", 1)));

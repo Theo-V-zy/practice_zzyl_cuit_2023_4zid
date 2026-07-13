@@ -412,7 +412,7 @@ CREATE TABLE `t_nursing_plain` (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `t_nursing_plain` VALUES (1,'A级护理计划',1,'A级','2026-07-09 15:12:55','马云','启动'),(2,'B级护理计划',2,'B级','2026-07-09 15:15:59','马云','启动'),(3,'B级护理计划',2,'B级','2026-07-09 15:18:19','马云','启动'),(4,'D护理计划',4,'D级','2026-07-09 15:19:57','马云','启动');
+INSERT INTO `t_nursing_plain` VALUES (1,'A级护理计划',1,'特级护理','2026-07-09 15:12:55','马云','启动'),(2,'B级护理计划',2,'一级护理','2026-07-09 15:15:59','马云','启动'),(3,'B级护理计划',2,'一级护理','2026-07-09 15:18:19','马云','启动'),(4,'D护理计划',4,'三级护理','2026-07-09 15:19:57','马云','启动');
 
 --
 -- Table structure for table `t_nursing_task`
@@ -499,7 +499,7 @@ CREATE TABLE `t_plain_item` (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `t_plain_item` VALUES (1,2,3,'助浴','2026-07-09T07:12:15.000Z','天',2),(2,2,4,'助浴','2026-07-09T07:19:12.000Z','天',1),(3,3,4,'肩颈按摩60分钟','2026-07-09T07:19:12.000Z','周',2),(4,4,4,'健康检查','2026-07-09T07:19:12.000Z','月',3);
+INSERT INTO `t_plain_item` VALUES (1,2,3,'助浴','2026-07-09T07:12:15.000Z','天',1),(2,2,4,'助浴','2026-07-09T07:19:12.000Z','天',1),(3,3,4,'肩颈按摩60分钟','2026-07-09T07:19:12.000Z','天',1),(4,4,4,'健康检查','2026-07-09T07:19:12.000Z','月',1);
 
 --
 -- Table structure for table `t_post`
