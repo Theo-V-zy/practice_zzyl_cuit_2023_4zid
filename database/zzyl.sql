@@ -413,7 +413,7 @@ CREATE TABLE `t_nursing_plain` (
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
-INSERT INTO `t_nursing_plain` VALUES (1,'A级护理计划','2026-07-09 15:12:55','马云','启动'),(2,'B级护理计划','2026-07-09 15:15:59','马云','启动'),(3,'B级护理计划','2026-07-09 15:18:19','马云','启动'),(4,'D护理计划','2026-07-09 15:19:57','马云','启动');
+INSERT INTO `t_nursing_plain` VALUES (1,'A级护理计划',NULL,NULL,'2026-07-09 15:12:55','马云','启动'),(2,'B级护理计划',NULL,NULL,'2026-07-09 15:15:59','马云','启动'),(3,'B级护理计划',NULL,NULL,'2026-07-09 15:18:19','马云','启动'),(4,'D护理计划',NULL,NULL,'2026-07-09 15:19:57','马云','启动');
 
 --
 -- Table structure for table `t_nursing_task`
