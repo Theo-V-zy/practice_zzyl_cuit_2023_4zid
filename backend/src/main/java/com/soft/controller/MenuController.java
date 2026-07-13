@@ -60,16 +60,29 @@ public class MenuController {
             }
         }
 
-        // 3. 从原始树中过滤重建
+        // 3. 从原始树中过滤重建（用flatMap找原始节点，而不是在根列表里搜pid）
         List<Menu> filtered = new ArrayList<>();
         for (Menu menu : allMenus) {
             if (keepIds.contains(menu.getId())) {
                 Menu copy = copyMenu(menu);
-                copy.setSubItems(filterChildrenFlat(allMenus, keepIds, menu.getId()));
+                copy.setSubItems(filterChildren(flatMap.get(menu.getId()), keepIds, flatMap));
                 filtered.add(copy);
             }
         }
         return filtered;
+    }
+
+    private List<Menu> filterChildren(Menu original, Set<Integer> keepIds, Map<Integer, Menu> flatMap) {
+        List<Menu> children = new ArrayList<>();
+        if (original == null || original.getSubItems() == null) return children;
+        for (Menu child : original.getSubItems()) {
+            if (keepIds.contains(child.getId())) {
+                Menu copy = copyMenu(child);
+                copy.setSubItems(filterChildren(child, keepIds, flatMap));
+                children.add(copy);
+            }
+        }
+        return children;
     }
 
     private void flattenTree(List<Menu> menus, Map<Integer, Menu> flat) {
@@ -79,18 +92,6 @@ public class MenuController {
                 flattenTree(m.getSubItems(), flat);
             }
         }
-    }
-
-    private List<Menu> filterChildrenFlat(List<Menu> menus, Set<Integer> keepIds, Integer parentId) {
-        List<Menu> children = new ArrayList<>();
-        for (Menu menu : menus) {
-            if (keepIds.contains(menu.getId()) && parentId.equals(menu.getPid())) {
-                Menu copy = copyMenu(menu);
-                copy.setSubItems(filterChildrenFlat(menus, keepIds, menu.getId()));
-                children.add(copy);
-            }
-        }
-        return children;
     }
 
     private Menu copyMenu(Menu src) {
