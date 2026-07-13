@@ -27,6 +27,19 @@ public class CustomerController {
         result.put("code", 400);
         result.put("msg", "添加客户失败");
 
+        // 自动生成客户编号
+        if (customer.getCustomerNo() == null || customer.getCustomerNo().isEmpty()) {
+            String maxNo = customerService.getMaxCustomerNo();
+            String nextNo;
+            if (maxNo == null) {
+                nextNo = "CUS001";
+            } else {
+                int num = Integer.parseInt(maxNo.substring(3)) + 1;
+                nextNo = "CUS" + String.format("%03d", num);
+            }
+            customer.setCustomerNo(nextNo);
+        }
+
         customer.setCreateTime(new Date());
         customer.setUpdateTime(new Date());
         customerService.save(customer);

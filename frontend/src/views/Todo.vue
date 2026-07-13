@@ -16,7 +16,7 @@
       </el-form-item>
       <el-form-item style="margin-left: 30%">
         <el-button type="success" round @click="doApprove('APPROVED')">通过</el-button>
-        <el-button type="danger" round @click="doApprove('已拒绝')">拒绝</el-button>
+        <el-button type="danger" round @click="doApprove('REJECTED')">拒绝</el-button>
         <el-button type="warning" round @click="approveDialogVisible = false">取消</el-button>
       </el-form-item>
     </el-form>
@@ -74,10 +74,21 @@ import axios from "axios";
 import { ElMessage } from "element-plus";
 
 const approveDialogVisible = ref(false);
+const currentUser = reactive({ id: 1, realname: '' });
 const approveForm = reactive({
   id: '', applyType: '', elderName: '', description: '',
-  approveOpinion: '', approveUser: '马云', approveUserId: 1
+  approveOpinion: '', approveUserId: 1
 });
+
+function loadCurrentUser() {
+  axios.get("/loadInfo").then(r => {
+    if (r.data && r.data.id) {
+      currentUser.id = r.data.id;
+      currentUser.realname = r.data.realname;
+      approveForm.approveUserId = r.data.id;
+    }
+  }).catch(e => console.log(e));
+}
 
 function openApproveDialog(row) {
   approveForm.id = row.id;
@@ -89,19 +100,21 @@ function openApproveDialog(row) {
 }
 
 function doApprove(status) {
-  axios.post("/approveApply", {
+  axios.put("/applies/approve", {
     id: approveForm.id,
     status: status,
-    approveUser: approveForm.approveUser,
     approveUserId: approveForm.approveUserId,
-    approveOpinion: approveForm.approveOpinion
+    approveComment: approveForm.approveOpinion
   }).then(response => {
     if (response.data.code == 200) {
       approveDialogVisible.value = false;
       doTodoPage(1);
     }
-    ElMessage(response.data.msg);
-  }).catch(error => console.log(error));
+    ElMessage({message: response.data.msg, type: response.data.code == 200 ? 'success' : 'error'});
+  }).catch(error => {
+    ElMessage({message: '审批请求失败', type: 'error'});
+    console.log(error);
+  });
 }
 
 const condForm = reactive({
@@ -116,10 +129,13 @@ function loadTodoList() {
     .then(response => {
       todoList.value = response.data.data;
       total.value = response.data.total;
-    }).catch(error => console.log(error));
+    }).catch(error => {
+      ElMessage({message: '加载待办列表失败', type: 'error'});
+      console.log(error);
+    });
 }
 
-onMounted(() => { loadTodoList(); });
+onMounted(() => { loadCurrentUser(); loadTodoList(); });
 
 function doTodoPage(pageNum) {
   condForm.pageNum = pageNum;

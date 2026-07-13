@@ -7,4 +7,5 @@ import java.util.Map;
 
 public interface CustomerService extends IService<Customer> {
     Map<String, Object> queryCustomerList(CustomerDto dto);
+    String getMaxCustomerNo();
 }

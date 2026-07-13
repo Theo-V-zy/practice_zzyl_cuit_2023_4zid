@@ -40,13 +40,12 @@
 </template>
 
 <script>
-import { request } from '../../api/request.js';
+import { familyElders } from '../../api/request.js';
 
 export default {
   data() {
     return {
-      familyList: [],
-      familyUserId: 1 // 从登录信息获取
+      familyList: []
     };
   },
   onShow() {
@@ -54,14 +53,8 @@ export default {
   },
   methods: {
     loadFamilyList() {
-      request({
-        url: '/family/myElders',
-        method: 'GET',
-        data: { familyUserId: this.familyUserId }
-      }).then(res => {
-        if (res.code === 200) {
-          this.familyList = res.data || [];
-        }
+      familyElders().then(res => {
+        this.familyList = res.data || [];
       }).catch(err => {
         console.error('加载家人列表失败', err);
       });
