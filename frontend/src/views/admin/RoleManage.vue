@@ -154,37 +154,35 @@ function handleToggle(r){
     updateRole({id:r.id,status:1}).then(()=>{ElMessage.success('启用成功');loadData()})
   }
 }
-function collectAllDescendantIds(node, treeData) {
+// 递归收集团队某节点及其所有子孙的ID
+function collectAllIds(node) {
   const ids = [node.id]
-  function walk(n) {
-    (n.subItems || n.children || []).forEach(c => { ids.push(c.id); walk(c) })
-  }
-  walk(node)
+  ;(node.subItems || []).forEach(c => { ids.push(...collectAllIds(c)) })
   return ids
 }
-function findNodeById(id, nodes) {
+// 在树中按ID查找节点
+function findInTree(id, nodes) {
   for (const n of nodes) {
     if (n.id === id) return n
-    const found = findNodeById(id, n.subItems || n.children || [])
-    if (found) return found
+    const r = findInTree(id, n.subItems || [])
+    if (r) return r
   }
   return null
 }
 async function saveMenus(){
   if(!selectedRole.value)return
-  const checked=menuTreeRef.value.getCheckedKeys()
-  const half=menuTreeRef.value.getHalfCheckedKeys()
-  // 补齐：每个勾选的父节点，自动带上所有子孙ID
+  const checked = menuTreeRef.value.getCheckedKeys()
+  const half = menuTreeRef.value.getHalfCheckedKeys()
   const allIds = new Set([...checked, ...half])
-  const treeData = menuTreeRef.value?.data || []
+  // 双向联动：每个勾选节点的所有子孙全带上
   for (const id of [...allIds]) {
-    const node = findNodeById(id, treeData)
-    if (node) collectAllDescendantIds(node, treeData).forEach(i => allIds.add(i))
+    const node = findInTree(id, menuTree.value)
+    if (node) collectAllIds(node).forEach(i => allIds.add(i))
   }
   await updateRoleMenus(selectedRole.value.id, [...allIds].join(','))
   ElMessage.success('菜单权限保存成功')
   selectedRole.value.menuIds = [...allIds].join(',')
-  editMode.value=false
+  editMode.value = false
 }
 async function saveDataScope(){
   if(!selectedRole.value)return
