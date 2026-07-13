@@ -137,6 +137,7 @@ public class UserController {
         if (dto.getStatus() != null) {
             wrapper.eq("islock", dto.getStatus() == 1 ? 0 : 1);
         }
+        wrapper.ne("islock", -1); // 排除已删除的用户
         wrapper.orderByDesc("create_time");
         Page<User> page = userService.page(new Page<>(dto.getPage(), dto.getPageSize()), wrapper);
 
