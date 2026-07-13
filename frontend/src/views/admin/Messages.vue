@@ -53,6 +53,7 @@
           <div class="msg-title-cell">
             <span v-if="row.readStatus === 0" class="unread-dot"></span>
             <el-link type="primary" :underline="false" @click="handleView(row)">{{ row.title }}</el-link>
+            <el-tag v-if="isNew(row)" size="small" type="primary" effect="dark" style="margin-left:6px">NEW</el-tag>
           </div>
         </template>
       </el-table-column>
@@ -148,6 +149,7 @@ function handleReset() {
   dateRange.value = null
   loadData()
 }
+function isNew(row) { return Date.now() - new Date(row.createTime).getTime() < 60000 }
 function handleSelectionChange(rows) { selectedIds.value = rows.map(r => r.id) }
 
 async function handleView(row) {
