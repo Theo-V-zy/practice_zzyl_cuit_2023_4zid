@@ -6,6 +6,7 @@
   "scripts": {
     "dev:mp-weixin": "cross-env UNI_INPUT_DIR=. uni -p mp-weixin",
     "build:mp-weixin": "cross-env UNI_INPUT_DIR=. uni build -p mp-weixin && node scripts/copy-miniapp-assets.mjs",
+    "copy-assets": "node scripts/copy-miniapp-assets.mjs",
     "test:smoke": "node scripts/smoke-miniapp.mjs"
   },
   "dependencies": {

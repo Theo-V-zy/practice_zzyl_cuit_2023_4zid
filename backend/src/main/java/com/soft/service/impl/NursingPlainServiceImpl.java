@@ -130,6 +130,15 @@ public class NursingPlainServiceImpl extends ServiceImpl<NursingPlainMapper, Nur
                 //该护理计划下存在护理项
                 item.setFlag(1);
             }
+            //检查计划下的护理项是否包含已禁用的护理项目
+            List<PlainItem> plainItems = plainItemMapper.selectList(wrapper);
+            for (PlainItem pi : plainItems) {
+                NursimgItem ni = nursimgItemMapper.selectById(pi.getItemId());
+                if (ni != null && !"启用".equals(ni.getIslock())) {
+                    item.setIslock("禁用");
+                    break;
+                }
+            }
         });
 
         result.put("nursingPlains",nursingPlains);
